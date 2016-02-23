@@ -27,6 +27,10 @@ public class PingCommon extends BitcoinMessage implements PingMessage {
 		out.writeLELong(nonce);
 	}
 	
+	public PingCommon read(int version, EndianDataInputStream in, Object ... extraParams) throws IOException {
+		return new PingCommon(version, in);
+	}
+	
 	public long getNonce() {
 		return this.nonce;
 	}

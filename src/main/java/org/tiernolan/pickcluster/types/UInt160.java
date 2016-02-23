@@ -29,5 +29,9 @@ public class UInt160 extends UIntBase {
 	public UInt160(byte[] buf, int endian) {
 		super(buf, SIZE, endian);
 	}
+	
+	public UInt160 read(int version, EndianDataInputStream in, Object ... extraParams) throws IOException {
+		return new UInt160(in, (Integer) extraParams[0]);
+	}
 
 }

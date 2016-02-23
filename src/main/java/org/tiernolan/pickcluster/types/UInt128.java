@@ -29,5 +29,9 @@ public class UInt128 extends UIntBase {
 	public UInt128(byte[] buf, int endian) {
 		super(buf, SIZE, endian);
 	}
+	
+	public UInt128 read(int version, EndianDataInputStream in, Object ... extraParams) throws IOException {
+		return new UInt128(in, (Integer) extraParams[0]);
+	}
 
 }

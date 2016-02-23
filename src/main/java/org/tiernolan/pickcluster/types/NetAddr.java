@@ -66,6 +66,10 @@ public class NetAddr implements NetType {
 		this.socket.write(out);
 	}
 	
+	public NetAddr read(int version, EndianDataInputStream in, Object ... extraParams) throws IOException {
+		return new NetAddr((Boolean) extraParams[0], in);
+	}
+	
 	public String toString() {
 		StringCreator sc = new StringCreator();
 		if (!version) {

@@ -17,7 +17,7 @@ public class TargetBits implements NetType {
 		this.target = bitsToTarget(bits);
 	}
 	
-	public TargetBits(int version, EndianDataInputStream in) throws IOException {
+	public TargetBits(EndianDataInputStream in) throws IOException {
 		this.bits = in.readLEInt();
 		this.target = bitsToTarget(bits);
 	}
@@ -28,6 +28,10 @@ public class TargetBits implements NetType {
 	
 	public void write(EndianDataOutputStream out) throws IOException {
 		out.writeLEInt(bits);
+	}
+	
+	public TargetBits read(int version, EndianDataInputStream in, Object ... extraParams) throws IOException {
+		return new TargetBits(in);
 	}
 	
 	public int getBits() {

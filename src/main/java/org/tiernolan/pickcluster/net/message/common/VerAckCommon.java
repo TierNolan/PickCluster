@@ -20,6 +20,10 @@ public class VerAckCommon extends BitcoinMessage implements VerackMessage {
 	@Override
 	public void write(int version, EndianDataOutputStream out) throws IOException {
 	}
+	
+	public VerAckCommon read(int version, EndianDataInputStream in, Object ... extraParams) throws IOException {
+		return new VerAckCommon(version, in);
+	}
 
 	@Override
 	public String getDataString() {

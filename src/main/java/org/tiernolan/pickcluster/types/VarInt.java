@@ -37,6 +37,10 @@ public class VarInt implements NetType {
 		write(out);
 	}
 	
+	public VarInt read(int version, EndianDataInputStream in, Object ... extraParams) throws IOException {
+		return new VarInt(in);
+	}
+	
 	public void write(EndianDataOutputStream out) throws IOException {
 		if (value < 0xFD) {
 			out.write((byte) value);

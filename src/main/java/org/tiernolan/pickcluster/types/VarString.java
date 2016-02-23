@@ -45,6 +45,10 @@ public class VarString implements NetType {
 		}
 	}
 	
+	public VarString read(int version, EndianDataInputStream in, Object ... extraParams) throws IOException {
+		return new VarString(in, (Integer) extraParams[0]);
+	}
+	
 	public String getValue() {
 		return string;
 	}

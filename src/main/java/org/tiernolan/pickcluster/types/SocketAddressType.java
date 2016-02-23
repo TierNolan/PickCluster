@@ -44,6 +44,10 @@ public class SocketAddressType implements NetType {
 		out.writeBEShort((short) port);
 	}
 	
+	public SocketAddressType read(int version, EndianDataInputStream in, Object ... extraParams) throws IOException {
+		return new SocketAddressType(in);
+	}
+	
 	public InetAddress getAddress() {
 		return addr;
 	}

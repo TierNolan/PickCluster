@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import org.tiernolan.pickcluster.types.UInt96;
 import org.tiernolan.pickcluster.types.encode.Convert;
+import org.tiernolan.pickcluster.types.endian.EndianDataInputStream;
 import org.tiernolan.pickcluster.types.endian.EndianDataOutputStream;
 
 
@@ -26,6 +27,10 @@ public class UnknownMessage extends Message {
 	@Override
 	public void write(int version, EndianDataOutputStream out) throws IOException {
 		out.write(data);
+	}
+	
+	public UnknownMessage read(int version, EndianDataInputStream in, Object ... extraParams) throws IOException {
+		throw new UnsupportedOperationException();
 	}
 
 	@Override

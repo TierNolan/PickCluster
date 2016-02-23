@@ -29,5 +29,9 @@ public class UInt256 extends UIntBase {
 	public UInt256(byte[] buf, int endian) {
 		super(buf, SIZE, endian);
 	}
+	
+	public UInt256 read(int version, EndianDataInputStream in, Object ... extraParams) throws IOException {
+		return new UInt256(in, (Integer) extraParams[0]);
+	}
 
 }

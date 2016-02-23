@@ -27,6 +27,10 @@ public class PongCommon extends BitcoinMessage implements PongMessage {
 		out.writeLELong(nonce);
 	}
 	
+	public PongCommon read(int version, EndianDataInputStream in, Object ... extraParams) throws IOException {
+		return new PongCommon(version, in);
+	}
+	
 	public long getNonce() {
 		return this.nonce;
 	}

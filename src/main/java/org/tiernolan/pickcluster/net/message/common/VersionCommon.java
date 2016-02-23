@@ -80,6 +80,10 @@ public class VersionCommon extends BitcoinMessage implements VersionMessage {
 		}
 	}
 	
+	public VersionCommon read(int version, EndianDataInputStream in, Object ... extraParams) throws IOException {
+		return new VersionCommon(version, in);
+	}
+	
 	public int getVersion() {
 		return this.version;
 	}

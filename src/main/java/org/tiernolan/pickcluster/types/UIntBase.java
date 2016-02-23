@@ -66,6 +66,14 @@ public class UIntBase implements Comparable<UIntBase>, NetType {
 		return this.value;
 	}
 	
+	protected int getLength() {
+		return buf.length;
+	}
+	
+	public UIntBase read(int version, EndianDataInputStream in, Object ... extraParams) throws IOException {
+		return new UIntBase(in, buf.length, (Integer) extraParams[0]);
+	}
+	
 	public void write(int version, EndianDataOutputStream out) throws IOException {
 		write(out);
 	}
