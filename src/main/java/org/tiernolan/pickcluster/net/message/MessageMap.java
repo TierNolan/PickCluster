@@ -1,13 +1,20 @@
 package org.tiernolan.pickcluster.net.message;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.tiernolan.pickcluster.net.chainparams.bitcoin.BitcoinMessageConstructor;
+import org.tiernolan.pickcluster.net.message.common.PingCommon;
+import org.tiernolan.pickcluster.net.message.common.PongCommon;
+import org.tiernolan.pickcluster.net.message.common.VerAckCommon;
+import org.tiernolan.pickcluster.net.message.common.VersionCommon;
 import org.tiernolan.pickcluster.types.UInt96;
 import org.tiernolan.pickcluster.types.encode.Convert;
+import org.tiernolan.pickcluster.types.endian.EndianDataInputStream;
 
 public class MessageMap {
 	
@@ -28,6 +35,9 @@ public class MessageMap {
 	private Map<UInt96, MessageConstructor> hashMap = new HashMap<UInt96, MessageConstructor>();
 	
 	protected MessageMap() {
+		addAllConstructorsCommon();
+		addAllConstructors();
+		done();
 	}
 	
 	protected MessageMap(MessageMap map) {
@@ -42,6 +52,32 @@ public class MessageMap {
 		this.hashMap = null;
 		this.done = true;
 		this.locked = false;
+	}
+	
+	private void addAllConstructorsCommon() {
+		this.add("version", new BitcoinMessageConstructor<VersionCommon>() {
+			@Override
+			public VersionCommon getMessage(int version, EndianDataInputStream in) throws IOException {
+				return new VersionCommon(version, in);
+			}});
+		this.add("verack", new BitcoinMessageConstructor<VerAckCommon>() {
+			@Override
+			public VerAckCommon getMessage(int version, EndianDataInputStream in) throws IOException {
+				return new VerAckCommon(version, in);
+			}});
+		this.add("ping", new BitcoinMessageConstructor<PingCommon>() {
+			@Override
+			public PingCommon getMessage(int version, EndianDataInputStream in) throws IOException {
+				return new PingCommon(version, in);
+			}});
+		this.add("pong", new BitcoinMessageConstructor<PongCommon>() {
+			@Override
+			public PongCommon getMessage(int version, EndianDataInputStream in) throws IOException {
+				return new PongCommon(version, in);
+			}});
+	}
+	
+	protected void addAllConstructors() {
 	}
 	
 	@SuppressWarnings("rawtypes")

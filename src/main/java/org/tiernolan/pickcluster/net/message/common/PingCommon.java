@@ -1,4 +1,4 @@
-package org.tiernolan.pickcluster.net.chainparams.bitcoin.message;
+package org.tiernolan.pickcluster.net.message.common;
 
 import java.io.IOException;
 
@@ -8,16 +8,16 @@ import org.tiernolan.pickcluster.types.endian.EndianDataInputStream;
 import org.tiernolan.pickcluster.types.endian.EndianDataOutputStream;
 import org.tiernolan.pickcluster.util.StringCreator;
 
-public class Ping extends BitcoinMessage implements PingMessage {
+public class PingCommon extends BitcoinMessage implements PingMessage {
 	
 	private final long nonce;
 	
-	public Ping(long nonce) {
+	public PingCommon(long nonce) {
 		super("ping");
 		this.nonce = nonce;
 	}
 	
-	public Ping(int version, EndianDataInputStream in) throws IOException {
+	public PingCommon(int version, EndianDataInputStream in) throws IOException {
 		super("ping");
 		this.nonce = in.readLELong();
 	}

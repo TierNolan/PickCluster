@@ -12,7 +12,7 @@ import org.junit.Test;
 import org.tiernolan.pickcluster.net.MessageInputStream;
 import org.tiernolan.pickcluster.net.MessageOutputStream;
 import org.tiernolan.pickcluster.net.chainparams.bitcoin.BitcoinChainParams;
-import org.tiernolan.pickcluster.net.chainparams.bitcoin.message.Version;
+import org.tiernolan.pickcluster.net.message.common.VersionCommon;
 import org.tiernolan.pickcluster.net.types.MessageInputStreamTest;
 import org.tiernolan.pickcluster.types.endian.EndianDataInputStream;
 import org.tiernolan.pickcluster.types.endian.EndianDataOutputStream;
@@ -30,13 +30,13 @@ public class MessageMapTest {
 		Message version = mis.getMessage();
 		
 		assertEquals("Unexpected command name", "version", version.getCommandString());
-		assertEquals("Unexpected message class type", Version.class, version.getClass());
+		assertEquals("Unexpected message class type", VersionCommon.class, version.getClass());
 		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		EndianDataOutputStream eos = new EndianDataOutputStream(baos);
 		
 		MessageOutputStream mos = new MessageOutputStream(eos, BitcoinChainParams.BITCOIN_MAIN);
-		mos.setVersion(((Version) version).getVersion());
+		mos.setVersion(((VersionCommon) version).getVersion());
 		mos.writeMessage(version);
 		mos.close();
 		

@@ -1,4 +1,4 @@
-package org.tiernolan.pickcluster.net.chainparams.bitcoin.message;
+package org.tiernolan.pickcluster.net.message.common;
 
 import java.io.IOException;
 
@@ -7,13 +7,13 @@ import org.tiernolan.pickcluster.net.message.VerackMessage;
 import org.tiernolan.pickcluster.types.endian.EndianDataInputStream;
 import org.tiernolan.pickcluster.types.endian.EndianDataOutputStream;
 
-public class VerAck extends BitcoinMessage implements VerackMessage {
+public class VerAckCommon extends BitcoinMessage implements VerackMessage {
 	
-	public VerAck() {
+	public VerAckCommon() {
 		super("verack");
 	}
 	
-	public VerAck(int version, EndianDataInputStream in) throws IOException {
+	public VerAckCommon(int version, EndianDataInputStream in) throws IOException {
 		super("verack");
 	}
 

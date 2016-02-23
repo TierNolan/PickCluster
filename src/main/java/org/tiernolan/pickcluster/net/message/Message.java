@@ -9,6 +9,10 @@ public abstract class Message implements NetType {
 	
 	private final UInt96 command;
 	
+	protected Message(String command) {
+		this(Convert.commandStringToUInt96(command));
+	}
+	
 	protected Message(UInt96 command) {
 		this.command = command;
 	}

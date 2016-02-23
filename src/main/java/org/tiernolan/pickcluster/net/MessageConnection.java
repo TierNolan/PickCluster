@@ -17,8 +17,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.tiernolan.pickcluster.crypt.CryptRandom;
 import org.tiernolan.pickcluster.net.chainparams.BadBehaviourIOException;
 import org.tiernolan.pickcluster.net.chainparams.ChainParameters;
-import org.tiernolan.pickcluster.net.chainparams.bitcoin.message.Ping;
-import org.tiernolan.pickcluster.net.chainparams.bitcoin.message.Pong;
 import org.tiernolan.pickcluster.net.message.Message;
 import org.tiernolan.pickcluster.net.message.MessageHandler;
 import org.tiernolan.pickcluster.net.message.MessageMap;
@@ -26,6 +24,8 @@ import org.tiernolan.pickcluster.net.message.PingMessage;
 import org.tiernolan.pickcluster.net.message.PongMessage;
 import org.tiernolan.pickcluster.net.message.VerackMessage;
 import org.tiernolan.pickcluster.net.message.VersionMessage;
+import org.tiernolan.pickcluster.net.message.common.PingCommon;
+import org.tiernolan.pickcluster.net.message.common.PongCommon;
 import org.tiernolan.pickcluster.types.encode.Convert;
 import org.tiernolan.pickcluster.util.StringCreator;
 import org.tiernolan.pickcluster.util.ThreadUtils;
@@ -349,16 +349,16 @@ public class MessageConnection extends Thread {
 		}
 	}
 	
-	private class PingHandler implements MessageHandler<Ping> {
+	private class PingHandler implements MessageHandler<PingCommon> {
 		
 		@Override
-		public void handle(MessageConnection connection, Ping message) throws IOException {
+		public void handle(MessageConnection connection, PingCommon message) throws IOException {
 			PongMessage pong = params.getMessageProtocol().getPongMessage(socket, node, message.getPingNonce());
 			sendMessage((Message) pong, true);
 		}
 	}
 	
-	private class PongHandler implements MessageHandler<Pong> {
+	private class PongHandler implements MessageHandler<PongCommon> {
 		private final PingPeriodicTask pingHandler;
 		private final long[] latencyArray;
 		private int index = 0;
@@ -372,7 +372,7 @@ public class MessageConnection extends Thread {
 		}
 		
 		@Override
-		public void handle(MessageConnection connection, Pong message) throws IOException {
+		public void handle(MessageConnection connection, PongCommon message) throws IOException {
 			long now = System.currentTimeMillis();
 			Long pingTime = pingHandler.getTime(message.getNonce());
 			if (pingTime != null) {

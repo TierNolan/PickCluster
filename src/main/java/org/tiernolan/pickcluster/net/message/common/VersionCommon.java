@@ -1,4 +1,4 @@
-package org.tiernolan.pickcluster.net.chainparams.bitcoin.message;
+package org.tiernolan.pickcluster.net.message.common;
 
 import java.io.EOFException;
 import java.io.IOException;
@@ -11,7 +11,7 @@ import org.tiernolan.pickcluster.types.endian.EndianDataInputStream;
 import org.tiernolan.pickcluster.types.endian.EndianDataOutputStream;
 import org.tiernolan.pickcluster.util.StringCreator;
 
-public class Version extends BitcoinMessage implements VersionMessage {
+public class VersionCommon extends BitcoinMessage implements VersionMessage {
 	
 	private final static int MAX_SUBVERSION_LENGTH = 256;
 	
@@ -25,7 +25,7 @@ public class Version extends BitcoinMessage implements VersionMessage {
 	private final int chainHeight;
 	private final boolean relay;
 	
-	public Version(int version, long services, long timestamp, NetAddr addrTo, NetAddr addrFrom, long nonce, VarString userAgent, int chainHeight, boolean relay) {
+	public VersionCommon(int version, long services, long timestamp, NetAddr addrTo, NetAddr addrFrom, long nonce, VarString userAgent, int chainHeight, boolean relay) {
 		super("version");
 		this.version = version;
 		this.services = services;
@@ -38,7 +38,7 @@ public class Version extends BitcoinMessage implements VersionMessage {
 		this.relay = relay;
 	}
 	
-	public Version(int version, EndianDataInputStream in) throws IOException {
+	public VersionCommon(int version, EndianDataInputStream in) throws IOException {
 		super("version");
 		this.version = in.readLEInt();
 		this.services = in.readLELong();

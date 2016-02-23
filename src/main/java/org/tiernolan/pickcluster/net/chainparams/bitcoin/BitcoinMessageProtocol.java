@@ -5,16 +5,16 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 
 import org.tiernolan.pickcluster.net.P2PNode;
-import org.tiernolan.pickcluster.net.chainparams.bitcoin.message.Ping;
-import org.tiernolan.pickcluster.net.chainparams.bitcoin.message.Pong;
-import org.tiernolan.pickcluster.net.chainparams.bitcoin.message.VerAck;
-import org.tiernolan.pickcluster.net.chainparams.bitcoin.message.Version;
 import org.tiernolan.pickcluster.net.message.MessageMap;
 import org.tiernolan.pickcluster.net.message.MessageProtocol;
 import org.tiernolan.pickcluster.net.message.PingMessage;
 import org.tiernolan.pickcluster.net.message.PongMessage;
 import org.tiernolan.pickcluster.net.message.VerackMessage;
 import org.tiernolan.pickcluster.net.message.VersionMessage;
+import org.tiernolan.pickcluster.net.message.common.PingCommon;
+import org.tiernolan.pickcluster.net.message.common.PongCommon;
+import org.tiernolan.pickcluster.net.message.common.VerAckCommon;
+import org.tiernolan.pickcluster.net.message.common.VersionCommon;
 import org.tiernolan.pickcluster.types.NetAddr;
 import org.tiernolan.pickcluster.types.SocketAddressType;
 import org.tiernolan.pickcluster.types.VarString;
@@ -48,22 +48,22 @@ public class BitcoinMessageProtocol implements MessageProtocol {
 		
 		int height = 0;
 		
-		return new Version(PROTOCOL_VERSION, node.getServices(), timestamp, netAddrTo, netAddrFrom, connectionNonce, userAgent, height, true);
+		return new VersionCommon(PROTOCOL_VERSION, node.getServices(), timestamp, netAddrTo, netAddrFrom, connectionNonce, userAgent, height, true);
 	}
 	
 	@Override
 	public VerackMessage getVerAckMessage(Socket socket, P2PNode node, long connectionNonce) {
-		return new VerAck();
+		return new VerAckCommon();
 	}
 	
 	@Override
 	public PingMessage getPingMessage(Socket socket, P2PNode node, long pingNonce) {
-		return new Ping(pingNonce);
+		return new PingCommon(pingNonce);
 	}
 	
 	@Override
 	public PongMessage getPongMessage(Socket socket, P2PNode node, long pingNonce) {
-		return new Pong(pingNonce);
+		return new PongCommon(pingNonce);
 	}
 
 }
