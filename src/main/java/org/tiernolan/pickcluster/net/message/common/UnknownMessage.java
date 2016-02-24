@@ -1,7 +1,8 @@
-package org.tiernolan.pickcluster.net.message;
+package org.tiernolan.pickcluster.net.message.common;
 
 import java.io.IOException;
 
+import org.tiernolan.pickcluster.net.message.Message;
 import org.tiernolan.pickcluster.types.UInt96;
 import org.tiernolan.pickcluster.types.encode.Convert;
 import org.tiernolan.pickcluster.types.endian.EndianDataInputStream;

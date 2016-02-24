@@ -12,7 +12,7 @@ import org.tiernolan.pickcluster.net.chainparams.ChainParameters;
 import org.tiernolan.pickcluster.net.message.Message;
 import org.tiernolan.pickcluster.net.message.MessageConstructor;
 import org.tiernolan.pickcluster.net.message.MessageMap;
-import org.tiernolan.pickcluster.net.message.UnknownMessage;
+import org.tiernolan.pickcluster.net.message.common.UnknownMessage;
 import org.tiernolan.pickcluster.types.UInt256;
 import org.tiernolan.pickcluster.types.UInt96;
 import org.tiernolan.pickcluster.types.encode.Convert;

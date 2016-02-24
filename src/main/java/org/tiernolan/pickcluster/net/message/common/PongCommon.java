@@ -2,13 +2,13 @@ package org.tiernolan.pickcluster.net.message.common;
 
 import java.io.IOException;
 
-import org.tiernolan.pickcluster.net.chainparams.bitcoin.BitcoinMessage;
-import org.tiernolan.pickcluster.net.message.PongMessage;
+import org.tiernolan.pickcluster.net.message.Message;
+import org.tiernolan.pickcluster.net.message.reference.PongMessage;
 import org.tiernolan.pickcluster.types.endian.EndianDataInputStream;
 import org.tiernolan.pickcluster.types.endian.EndianDataOutputStream;
 import org.tiernolan.pickcluster.util.StringCreator;
 
-public class PongCommon extends BitcoinMessage implements PongMessage {
+public class PongCommon extends Message implements PongMessage {
 	
 	private final long nonce;
 	

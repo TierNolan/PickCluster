@@ -3,15 +3,15 @@ package org.tiernolan.pickcluster.net.message.common;
 import java.io.EOFException;
 import java.io.IOException;
 
-import org.tiernolan.pickcluster.net.chainparams.bitcoin.BitcoinMessage;
-import org.tiernolan.pickcluster.net.message.VersionMessage;
+import org.tiernolan.pickcluster.net.message.Message;
+import org.tiernolan.pickcluster.net.message.reference.VersionMessage;
 import org.tiernolan.pickcluster.types.NetAddr;
 import org.tiernolan.pickcluster.types.VarString;
 import org.tiernolan.pickcluster.types.endian.EndianDataInputStream;
 import org.tiernolan.pickcluster.types.endian.EndianDataOutputStream;
 import org.tiernolan.pickcluster.util.StringCreator;
 
-public class VersionCommon extends BitcoinMessage implements VersionMessage {
+public class VersionCommon extends Message implements VersionMessage {
 	
 	private final static int MAX_SUBVERSION_LENGTH = 256;
 	

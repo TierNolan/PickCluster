@@ -55,22 +55,22 @@ public class MessageMap {
 	}
 	
 	private void addAllConstructorsCommon() {
-		this.add("version", new BitcoinMessageConstructor<VersionCommon>() {
+		this.add("version", new MessageConstructor<VersionCommon>() {
 			@Override
 			public VersionCommon getMessage(int version, EndianDataInputStream in) throws IOException {
 				return new VersionCommon(version, in);
 			}});
-		this.add("verack", new BitcoinMessageConstructor<VerAckCommon>() {
+		this.add("verack", new MessageConstructor<VerAckCommon>() {
 			@Override
 			public VerAckCommon getMessage(int version, EndianDataInputStream in) throws IOException {
 				return new VerAckCommon(version, in);
 			}});
-		this.add("ping", new BitcoinMessageConstructor<PingCommon>() {
+		this.add("ping", new MessageConstructor<PingCommon>() {
 			@Override
 			public PingCommon getMessage(int version, EndianDataInputStream in) throws IOException {
 				return new PingCommon(version, in);
 			}});
-		this.add("pong", new BitcoinMessageConstructor<PongCommon>() {
+		this.add("pong", new MessageConstructor<PongCommon>() {
 			@Override
 			public PongCommon getMessage(int version, EndianDataInputStream in) throws IOException {
 				return new PongCommon(version, in);

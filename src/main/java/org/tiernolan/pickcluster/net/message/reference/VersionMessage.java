@@ -1,4 +1,4 @@
-package org.tiernolan.pickcluster.net.message;
+package org.tiernolan.pickcluster.net.message.reference;
 
 public interface VersionMessage {
 
