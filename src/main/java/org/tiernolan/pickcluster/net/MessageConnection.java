@@ -29,6 +29,7 @@ import org.tiernolan.pickcluster.net.message.reference.VersionMessage;
 import org.tiernolan.pickcluster.types.encode.Convert;
 import org.tiernolan.pickcluster.util.StringCreator;
 import org.tiernolan.pickcluster.util.ThreadUtils;
+import org.tiernolan.pickcluster.util.TimeUtils;
 
 public class MessageConnection extends Thread {
 	
@@ -263,7 +264,7 @@ public class MessageConnection extends Thread {
 					}
 					if (!periodTaskQueue.isEmpty()) {
 						PeriodicTask first = periodTaskQueue.first();
-						if (first.getNextRun() < System.currentTimeMillis()) {
+						if (first.getNextRun() < TimeUtils.getCurrentTimeMillis()) {
 							first = periodTaskQueue.pollFirst();
 							synchronized (handlerLock) {
 								first.run();
@@ -284,7 +285,7 @@ public class MessageConnection extends Thread {
 						try {
 							if (!periodTaskQueue.isEmpty()) {
 								PeriodicTask first = periodTaskQueue.first();	
-								long delay = first.getNextRun() - System.currentTimeMillis();
+								long delay = first.getNextRun() - TimeUtils.getCurrentTimeMillis();
 								delay = Math.max(delay, 0) + 1;
 								wait(delay);
 							} else {
@@ -325,7 +326,7 @@ public class MessageConnection extends Thread {
 		
 		public PeriodicTask(MessageHandler<Message> task, long seconds) {
 			this.task = task;
-			this.nextRun = System.currentTimeMillis() - 1000;
+			this.nextRun = TimeUtils.getCurrentTimeMillis() - 1000;
 			this.period = seconds * 1000;
 		}
 
@@ -373,7 +374,7 @@ public class MessageConnection extends Thread {
 		
 		@Override
 		public void handle(MessageConnection connection, PongCommon message) throws IOException {
-			long now = System.currentTimeMillis();
+			long now = TimeUtils.getCurrentTimeMillis();
 			Long pingTime = pingHandler.getTime(message.getNonce());
 			if (pingTime != null) {
 				latencyArray[index] = now - pingTime;
@@ -417,7 +418,7 @@ public class MessageConnection extends Thread {
 				nonceMap.remove(key);
 			}
 			long nonce = CryptRandom.nextLong();
-			long now = System.currentTimeMillis();
+			long now = TimeUtils.getCurrentTimeMillis();
 			nonceMap.put(nonce, now);
 			PingMessage ping = params.getMessageProtocol().getPingMessage(socket, node, nonce);
 			sendMessage((Message) ping, true);

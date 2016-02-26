@@ -2,14 +2,14 @@ package org.tiernolan.pickcluster.net.chainparams.bitcoin;
 
 import java.math.BigInteger;
 
+import org.tiernolan.pickcluster.net.blockchain.HeaderInfo;
 import org.tiernolan.pickcluster.net.chainparams.ChainParameters;
-import org.tiernolan.pickcluster.net.chainparams.TargetBitsContainer;
-import org.tiernolan.pickcluster.net.chainparams.TargetCalculator;
-import org.tiernolan.pickcluster.net.chainparams.TimestampContainer;
+import org.tiernolan.pickcluster.net.chainparams.bitcoin.types.BitcoinHeader;
 import org.tiernolan.pickcluster.net.message.MessageProtocol;
 import org.tiernolan.pickcluster.types.TargetBits;
 import org.tiernolan.pickcluster.types.UInt256;
 import org.tiernolan.pickcluster.types.encode.Convert;
+import org.tiernolan.pickcluster.types.reference.Header;
 
 public class BitcoinChainParams implements ChainParameters {
 	
@@ -24,7 +24,6 @@ public class BitcoinChainParams implements ChainParameters {
 	private final int retargetSpacing;
 	private final int retargetTimespan;
 	private final BigInteger maxPOWTarget;
-	private final TargetCalculator targetCalculator;
 	private final UInt256 genesisHash;
 	private final MessageProtocol messageProtocol;
 	
@@ -52,8 +51,6 @@ public class BitcoinChainParams implements ChainParameters {
 		this.retargetBlockCount = retargetTimespan / retargetSpacing;
 		this.maxPOWTarget = maxPOWTarget;
 		this.genesisHash = genesisHash;
-		
-		this.targetCalculator = new BitcoinTargetCalculator();
 		this.messageProtocol = messageProtocol; 
 	}
 	
@@ -69,11 +66,6 @@ public class BitcoinChainParams implements ChainParameters {
 			return 0;
 		}
 		return (50 * COIN) >> halvings;
-	}
-	
-	@Override
-	public TargetCalculator getTargetCalculator() {
-		return this.targetCalculator;
 	}
 
 	@Override
@@ -95,35 +87,32 @@ public class BitcoinChainParams implements ChainParameters {
 	public MessageProtocol getMessageProtocol() {
 		return this.messageProtocol;
 	}
-	
-	private class BitcoinTargetCalculator implements TargetCalculator {
 
-		@Override
-		public TargetBits getTargetBits(TargetBitsContainer[] targets, TimestampContainer[] times, int height) {
-			if ((height % retargetBlockCount) != 0) {
-				return targets[height - 1].getTargetBits();
-			}
-			
-			long end = times[height - 1].getTimestamp() & 0xFFFFFFFF;
-			long start = times[height - retargetBlockCount].getTimestamp() & 0xFFFFFFFF;
-			
-			long timespan = end - start;
-			if (timespan < (retargetTimespan / 4)) {
-				timespan = retargetTimespan / 4;
-			}
-			if (timespan > (retargetTimespan * 4)) {
-				timespan = retargetTimespan * 4;
-			}
-			BigInteger newTarget = targets[height - 1].getTargetBits().getTarget();
-			newTarget = newTarget.multiply(BigInteger.valueOf(timespan));
-			newTarget = newTarget.divide(BigInteger.valueOf(retargetTimespan));
-			
-			if (newTarget.compareTo(maxPOWTarget) > 0) {
-				newTarget = maxPOWTarget;
-			}
-			return new TargetBits(newTarget);
+	public TargetBits getTargetBits(HeaderInfo<BitcoinHeader> thisInfo, int height) {
+		BitcoinHeader last = (BitcoinHeader) thisInfo.getHeader();
+		if ((height % retargetBlockCount) != 0) {
+			return last.getBits();
 		}
+		BitcoinHeader first = thisInfo.getAncestorInfo(height - retargetBlockCount).getHeader();
 		
+		long end = last.getTimestamp() & 0xFFFFFFFFL;
+		long start = first.getTimestamp() & 0xFFFFFFFFL;
+		
+		long timespan = end - start;
+		if (timespan < (retargetTimespan / 4)) {
+			timespan = retargetTimespan / 4;
+		}
+		if (timespan > (retargetTimespan * 4)) {
+			timespan = retargetTimespan * 4;
+		}
+		BigInteger newTarget = last.getBits().getTarget();
+		newTarget = newTarget.multiply(BigInteger.valueOf(timespan));
+		newTarget = newTarget.divide(BigInteger.valueOf(retargetTimespan));
+		
+		if (newTarget.compareTo(maxPOWTarget) > 0) {
+			newTarget = maxPOWTarget;
+		}
+		return new TargetBits(newTarget);
 	}
 
 	@Override

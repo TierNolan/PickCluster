@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.tiernolan.pickcluster.net.chainparams.bitcoin.BitcoinMessageConstructor;
 import org.tiernolan.pickcluster.net.message.common.PingCommon;
 import org.tiernolan.pickcluster.net.message.common.PongCommon;
 import org.tiernolan.pickcluster.net.message.common.VerAckCommon;

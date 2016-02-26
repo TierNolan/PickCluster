@@ -10,7 +10,6 @@ public interface ChainParameters {
 	public long getSubsidy(int height);
 	
 	public int getMaxMessageLength();
-	public TargetCalculator getTargetCalculator();
 	public int getBigEndianMessagePrefix();
 	public int getDefaultPort();
 	public UInt256 getGenesisHash();

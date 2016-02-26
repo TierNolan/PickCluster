@@ -18,6 +18,7 @@ import org.tiernolan.pickcluster.net.message.reference.VersionMessage;
 import org.tiernolan.pickcluster.types.NetAddr;
 import org.tiernolan.pickcluster.types.SocketAddressType;
 import org.tiernolan.pickcluster.types.VarString;
+import org.tiernolan.pickcluster.util.TimeUtils;
 
 public class BitcoinMessageProtocol implements MessageProtocol {
 	
@@ -32,7 +33,7 @@ public class BitcoinMessageProtocol implements MessageProtocol {
 
 	@Override
 	public VersionMessage getVersionMessage(Socket socket, P2PNode node, long connectionNonce) {
-		long timestamp = System.currentTimeMillis() / 1000L;
+		long timestamp = TimeUtils.getCurrentTimeMillis() / 1000L;
 		VarString userAgent = new VarString("/" + node.getServerType() + ":0.0/");
 		
 		NetAddr netAddrTo;
