@@ -20,5 +20,10 @@ public class BitcoinNode extends P2PNode {
 	protected void addOnConnectMessageHandlers() throws IOException {
 		addConnectMessageHandler(tracker.getOnConnectMessageHandler());
 	}
+	
+	public void interrupt() {
+		super.interrupt();
+		tracker.shutdownSaveThread(false);
+	}
 
 }

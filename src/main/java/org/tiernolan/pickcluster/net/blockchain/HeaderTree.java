@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.tiernolan.pickcluster.net.P2PNode;
 import org.tiernolan.pickcluster.net.chainparams.BadBehaviourIOException;
 import org.tiernolan.pickcluster.net.chainparams.ChainParameters;
 import org.tiernolan.pickcluster.types.UInt256;
@@ -39,6 +40,10 @@ public class HeaderTree<T extends Header<T>> {
 	private HeaderInfo[] mainChain = new HeaderInfo[1000];
 	
 	public HeaderTree(T genesis, File directory, ChainParameters chainParams) throws IOException {
+		this(null, genesis, directory, chainParams);
+	}
+	
+	public HeaderTree(P2PNode node, T genesis, File directory, ChainParameters chainParams) throws IOException {
 		this.genesis = genesis;
 		this.chainParams = chainParams;
 		this.chainTip = new HeaderInfo<T>(genesis, null, 0, genesis.getDifficulty(), true);
@@ -50,6 +55,9 @@ public class HeaderTree<T extends Header<T>> {
 				if (!directory.isDirectory()) {
 					throw new IOException(directory + " is not a directory");
 				} else {
+					if (node != null) {
+						System.out.println(node.getServerType() + "/HeaderTree: Reading headers from disk");
+					}
 					readFromDisk(directory);
 				}
 			}

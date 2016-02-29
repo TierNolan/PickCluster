@@ -1,5 +1,6 @@
 package org.tiernolan.pickcluster.net.chainparams.bitcoin;
 
+import java.io.File;
 import java.io.IOException;
 import java.math.BigInteger;
 
@@ -20,7 +21,10 @@ public class HeaderTracker {
 	
 	public HeaderTracker(BitcoinNode node, BitcoinChainParams params) throws IOException {
 		this.node = node;
-		tree = new HeaderTree<BitcoinHeader>(params.getGenesis(), null, params);
+		File networkDir = new File("data", params.getNetworkName());
+		File headersDir = new File(networkDir, "headers");
+		
+		tree = new HeaderTree<BitcoinHeader>(node, params.getGenesis(), headersDir, params);
 	}
 	
 	private BitcoinGetHeaders getGetHeaders() {
@@ -36,7 +40,10 @@ public class HeaderTracker {
 	public MessageHandler<BitcoinHeaders> getHeadersMessageHandler() {
 		return new HeadersMessageHandler();
 	}
-
+	
+	public void shutdownSaveThread(boolean wait) {
+		tree.interruptSaveThread(wait);
+	}
 	
 	private class OnConnectGetHeadersTask implements MessageHandler<Message> {
 		@Override
