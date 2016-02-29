@@ -1,7 +1,7 @@
 package org.tiernolan.pickcluster.net.chainparams;
 
 import org.tiernolan.pickcluster.net.message.MessageProtocol;
-import org.tiernolan.pickcluster.types.UInt256;
+import org.tiernolan.pickcluster.types.reference.Header;
 
 public interface ChainParameters {
 	
@@ -12,6 +12,6 @@ public interface ChainParameters {
 	public int getMaxMessageLength();
 	public int getBigEndianMessagePrefix();
 	public int getDefaultPort();
-	public UInt256 getGenesisHash();
+	public Header<?> getGenesis();
 	public MessageProtocol getMessageProtocol();
 }

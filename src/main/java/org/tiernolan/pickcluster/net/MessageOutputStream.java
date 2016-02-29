@@ -17,10 +17,12 @@ public class MessageOutputStream extends EndianDataOutputStream {
 	
 	private int version;
 	private long totalSent = 0;
+	private final int maxMessageLength;
 	
 	public MessageOutputStream(OutputStream out, ChainParameters params) {
 		super(out);
 		this.bigEndianPrefix = params.getBigEndianMessagePrefix();
+		this.maxMessageLength = params.getMaxMessageLength();
 	}
 	
 
@@ -34,13 +36,15 @@ public class MessageOutputStream extends EndianDataOutputStream {
 		UInt256 digest = Digest.doubleSHA256(data);
 		int checksum = Endian.swap(digest.toBigInteger().intValue());
 		
+		if (data.length + 24 > maxMessageLength) {
+			System.out.println("Warning: outgoing message exceeds maximum message length");
+		}
 		// Header
 		this.writeBEInt(this.bigEndianPrefix);
 		message.getCommand().write(this);
 		writeLEInt(data.length);
 		writeBEInt(checksum);
 		totalSent += 24;
-		
 		// Payload
 		write(data);
 		totalSent += data.length;

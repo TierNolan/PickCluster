@@ -22,7 +22,7 @@ import org.tiernolan.pickcluster.util.TimeUtils;
 
 public class BitcoinMessageProtocol implements MessageProtocol {
 	
-	private final int PROTOCOL_VERSION = 70012;
+	public static final int PROTOCOL_VERSION = 70012;
 	
 	private final BitcoinMessageMap messageMap = (BitcoinMessageMap) new BitcoinMessageMap().lock();
 

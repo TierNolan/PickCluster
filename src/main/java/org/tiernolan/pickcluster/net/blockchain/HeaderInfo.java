@@ -39,6 +39,9 @@ public class HeaderInfo<T extends Header<T>> {
 		if (height > getHeight()) {
 			throw new IllegalArgumentException("Height is to large to be an ancestor height");
 		}
+		if (height < 0) {
+			return null;
+		}
 		HeaderInfo<T> temp = this;
 		while (temp.getHeight() != height) {
 			if (temp.skipTarget.getHeight() >= height) {

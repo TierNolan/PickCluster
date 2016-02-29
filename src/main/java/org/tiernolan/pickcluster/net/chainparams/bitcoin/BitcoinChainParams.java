@@ -9,7 +9,6 @@ import org.tiernolan.pickcluster.net.message.MessageProtocol;
 import org.tiernolan.pickcluster.types.TargetBits;
 import org.tiernolan.pickcluster.types.UInt256;
 import org.tiernolan.pickcluster.types.encode.Convert;
-import org.tiernolan.pickcluster.types.reference.Header;
 
 public class BitcoinChainParams implements ChainParameters {
 	
@@ -24,23 +23,30 @@ public class BitcoinChainParams implements ChainParameters {
 	private final int retargetSpacing;
 	private final int retargetTimespan;
 	private final BigInteger maxPOWTarget;
-	private final UInt256 genesisHash;
+	private final BitcoinHeader genesis;
 	private final MessageProtocol messageProtocol;
 	
 	public static final BitcoinChainParams BITCOIN_MAIN = new BitcoinChainParams(
 				"main",
 				8333,
-				4000000,
+				2 * 1024 * 1024,
 				210000,
 				0xf9beb4d9,
 				10 * 60,
 				14 * 24 * 60 * 60,
 				new BigInteger(Convert.hexToBytes("00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffff")),
-				new UInt256(Convert.hexToBytes("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f")),
+				new BitcoinHeader(
+						1, 
+						new UInt256(BigInteger.ZERO), 
+						new UInt256(new BigInteger(Convert.hexToBytes("004a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"))),
+						1231006505,
+						new TargetBits(TargetBits.bitsToTarget(0x1d00ffff)),
+						2083236893,
+						0),
 				new BitcoinMessageProtocol()
 			);
 	
-	protected BitcoinChainParams(String name, int defaultPort, int maxMessage, int subsidyHalving, int messagePrefix, int retargetSpacing, int retargetTimespan, BigInteger maxPOWTarget, UInt256 genesisHash, MessageProtocol messageProtocol) {
+	protected BitcoinChainParams(String name, int defaultPort, int maxMessage, int subsidyHalving, int messagePrefix, int retargetSpacing, int retargetTimespan, BigInteger maxPOWTarget, BitcoinHeader genesis, MessageProtocol messageProtocol) {
 		this.name = name;
 		this.defaultPort = defaultPort;
 		this.maxMessage = maxMessage;
@@ -50,7 +56,7 @@ public class BitcoinChainParams implements ChainParameters {
 		this.retargetTimespan = retargetTimespan;
 		this.retargetBlockCount = retargetTimespan / retargetSpacing;
 		this.maxPOWTarget = maxPOWTarget;
-		this.genesisHash = genesisHash;
+		this.genesis = genesis;
 		this.messageProtocol = messageProtocol; 
 	}
 	
@@ -79,8 +85,8 @@ public class BitcoinChainParams implements ChainParameters {
 	}
 	
 	@Override
-	public UInt256 getGenesisHash() {
-		return this.genesisHash;
+	public BitcoinHeader getGenesis() {
+		return this.genesis;
 	}
 	
 	@Override
@@ -89,7 +95,7 @@ public class BitcoinChainParams implements ChainParameters {
 	}
 
 	public TargetBits getTargetBits(HeaderInfo<BitcoinHeader> thisInfo, int height) {
-		BitcoinHeader last = (BitcoinHeader) thisInfo.getHeader();
+		BitcoinHeader last = (BitcoinHeader) thisInfo.getParentInfo().getHeader();
 		if ((height % retargetBlockCount) != 0) {
 			return last.getBits();
 		}

@@ -11,7 +11,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.tiernolan.pickcluster.crypt.CryptRandom;
@@ -27,11 +26,14 @@ import org.tiernolan.pickcluster.net.message.reference.PongMessage;
 import org.tiernolan.pickcluster.net.message.reference.VerackMessage;
 import org.tiernolan.pickcluster.net.message.reference.VersionMessage;
 import org.tiernolan.pickcluster.types.encode.Convert;
+import org.tiernolan.pickcluster.util.CatchingThread;
 import org.tiernolan.pickcluster.util.StringCreator;
+import org.tiernolan.pickcluster.util.Task;
+import org.tiernolan.pickcluster.util.TaskQueue;
 import org.tiernolan.pickcluster.util.ThreadUtils;
 import org.tiernolan.pickcluster.util.TimeUtils;
 
-public class MessageConnection extends Thread {
+public class MessageConnection extends CatchingThread {
 	
 	private static AtomicInteger connectionIdCount = new AtomicInteger();
 	
@@ -45,7 +47,7 @@ public class MessageConnection extends Thread {
 	private final P2PNode node;
 	private final MessageInputStream mis;
 	private final MessageOutputStream mos;
-	private final MessageWriteThread messageWriteThread = new MessageWriteThread();
+	private final MessageWriteThread messageWriteThread;
 	
 	private final PingPeriodicTask periodicPingHandler;
 	private final PongHandler pongHandler;
@@ -53,19 +55,23 @@ public class MessageConnection extends Thread {
 	
 	private final ConcurrentLinkedQueue<Message> fastMessageQueue = new ConcurrentLinkedQueue<Message>();
 	private final ConcurrentLinkedQueue<Message> messageQueue = new ConcurrentLinkedQueue<Message>();
-	private final ConcurrentSkipListSet<PeriodicTask> periodTaskQueue = new ConcurrentSkipListSet<PeriodicTask>(); 
+	private final TaskQueue taskQueue; 
 	private final Object handlerLock = new Object();
 	
 	private String remoteUserAgent;
 	private int version;
 	
 	public MessageConnection(P2PNode node, Socket socket, boolean upstream, ChainParameters params) throws IOException {
+		this.connectionId = connectionIdCount.getAndIncrement();
 		if (socket == null) {
 			throw new NullPointerException("Socket is null");
 		}
 		if (!socket.isConnected()) {
 			throw new IllegalArgumentException("Socket is not connected");
 		}
+		super.setName(node.getName() + "/Connection-" + connectionId);
+		this.messageWriteThread = new MessageWriteThread();
+		this.taskQueue = new TaskQueue(messageWriteThread);
 		this.remoteAddress = (InetSocketAddress) socket.getRemoteSocketAddress();
 		this.params = params;
 		this.messageMap = params.getMessageProtocol().getMessageMap().copyConstructorsOnly();
@@ -75,7 +81,6 @@ public class MessageConnection extends Thread {
 		this.mis = getInputStream(socket, params);
 		this.mos = getOutputStream(socket, params);
 		this.connectionNonce = CryptRandom.nextLong();
-		this.connectionId = connectionIdCount.getAndIncrement();
 		this.periodicPingHandler = new PingPeriodicTask();
 		this.pongHandler = new PongHandler(periodicPingHandler);
 		this.pingHandler = new PingHandler();
@@ -169,7 +174,8 @@ public class MessageConnection extends Thread {
 		messageWriteThread.interrupt();
 	}
 
-	public void run() {
+	@Override
+	public void secondaryRun() {
 		int misbehaviour = 0;
 		try {
 			socket.setSoTimeout(5000);
@@ -191,6 +197,7 @@ public class MessageConnection extends Thread {
 							}
 						}
 					} catch (BadBehaviourIOException e) {
+						e.printStackTrace();
 						misbehaviour += e.getBanPercent();;
 						if (misbehaviour >= 100) {
 							//node.ban(this);
@@ -224,10 +231,11 @@ public class MessageConnection extends Thread {
 	}
 	
 	public void addPeriodicHandler(MessageHandler<Message> handler, long seconds) {
-		periodTaskQueue.add(new PeriodicTask(handler, seconds));
-		synchronized(messageWriteThread) {
-			messageWriteThread.notify();
-		}
+		taskQueue.add(new Task(this, handler, seconds));
+	}
+	
+	public void addImmediateHandler(MessageHandler<Message> handler) {
+		addPeriodicHandler(handler, -1L);
 	}
 	
 	public int getLatency() {
@@ -253,8 +261,14 @@ public class MessageConnection extends Thread {
 		return sc.toString();
 	}
 	
-	private class MessageWriteThread extends Thread {
-		public void run() {
+	private class MessageWriteThread extends CatchingThread {
+		
+		public MessageWriteThread() {
+			setName(MessageConnection.this.getName() + "/WriteThread");
+		}
+		
+		@Override
+		public void secondaryRun() {
 			try {
 				while (!interrupted()) {
 					Message fastMessage = fastMessageQueue.poll();
@@ -262,14 +276,8 @@ public class MessageConnection extends Thread {
 						mos.writeMessage(fastMessage);
 						continue;
 					}
-					if (!periodTaskQueue.isEmpty()) {
-						PeriodicTask first = periodTaskQueue.first();
-						if (first.getNextRun() < TimeUtils.getCurrentTimeMillis()) {
-							first = periodTaskQueue.pollFirst();
-							synchronized (handlerLock) {
-								first.run();
-							}
-							periodTaskQueue.add(first);
+					synchronized (handlerLock) {
+						if (taskQueue.runTaskIfPending()) {
 							continue;
 						}
 					}
@@ -283,14 +291,7 @@ public class MessageConnection extends Thread {
 							continue;
 						}
 						try {
-							if (!periodTaskQueue.isEmpty()) {
-								PeriodicTask first = periodTaskQueue.first();	
-								long delay = first.getNextRun() - TimeUtils.getCurrentTimeMillis();
-								delay = Math.max(delay, 0) + 1;
-								wait(delay);
-							} else {
-								wait();
-							}
+							taskQueue.runTask();
 						} catch (InterruptedException e) {
 							break;
 						}
@@ -307,46 +308,6 @@ public class MessageConnection extends Thread {
 				} catch (IOException e) {}
 				MessageConnection.super.interrupt();
 			}
-		}
-		
-		public void sleepUntilDead() {
-			while (messageWriteThread.isAlive()) {
-				try {
-					messageWriteThread.join();
-				} catch (InterruptedException e) {
-				}
-			}
-		}
-	}
-	
-	private class PeriodicTask implements Comparable<PeriodicTask> {
-		private final MessageHandler<Message> task;
-		private long nextRun;
-		private long period;
-		
-		public PeriodicTask(MessageHandler<Message> task, long seconds) {
-			this.task = task;
-			this.nextRun = TimeUtils.getCurrentTimeMillis() - 1000;
-			this.period = seconds * 1000;
-		}
-
-		@Override
-		public int compareTo(PeriodicTask o) {
-			return Long.compare(nextRun, o.nextRun);
-		}
-		
-		@Override
-		public boolean equals(Object o) {
-			return this == o;
-		}
-		
-		public long getNextRun() {
-			return nextRun;
-		}
-		
-		public void run() throws IOException {
-			task.handle(MessageConnection.this, null);
-			nextRun += period;
 		}
 	}
 	

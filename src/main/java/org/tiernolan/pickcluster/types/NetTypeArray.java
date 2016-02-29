@@ -42,6 +42,10 @@ public class NetTypeArray<T extends NetType> implements NetType {
 		this.sizeEstimate = estimate;
 	}
 	
+	public int length() {
+		return array.length;
+	}
+	
 	@Override
 	public void write(int version, EndianDataOutputStream out) throws IOException {
 		length.write(out);

@@ -9,6 +9,8 @@ import org.tiernolan.pickcluster.util.StringCreator;
 
 public class TargetBits implements NetType {
 	
+	public static final TargetBits EXAMPLE = new TargetBits(BigInteger.ZERO);
+	
 	private final int bits;
 	private final BigInteger target;
 	

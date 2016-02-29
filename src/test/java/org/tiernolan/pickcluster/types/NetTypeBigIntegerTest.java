@@ -39,8 +39,6 @@ public class NetTypeBigIntegerTest {
 			EndianDataOutputStream eos = new EndianDataOutputStream(baos);
 			fromInt.write(0, eos);
 			eos.flush();
-			System.out.println("Got " + Convert.bytesToHex(baos.toByteArray()));
-			System.out.println("Exp " + Convert.bytesToHex(expEncoded));
 			assertTrue(Arrays.equals(baos.toByteArray(), expEncoded));
 			
 			ByteArrayInputStream bais = new ByteArrayInputStream(expEncoded);

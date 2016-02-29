@@ -101,11 +101,6 @@ public class HeaderTreeTest {
 					success &= f1.delete();
 				}
 				assertTrue(success);
-				System.out.println("Deleted all files");
-				for (File file : f.listFiles()) {
-					System.out.println("Exists " + file + " " + file.exists());
-				}
-				
 			}
 		}
 	}

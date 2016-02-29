@@ -4,19 +4,22 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 
-import org.tiernolan.pickcluster.net.P2PNode;
 import org.tiernolan.pickcluster.net.chainparams.bitcoin.BitcoinChainParams;
+import org.tiernolan.pickcluster.net.chainparams.bitcoin.BitcoinNode;
 
 public class PickCluster {
 	
 	public static void main(String[] args) throws UnknownHostException, IOException, InterruptedException {
-		P2PNode node = new P2PNode("PickCluster", BitcoinChainParams.BITCOIN_MAIN, 0);
+		
+		BitcoinNode node = new BitcoinNode(BitcoinChainParams.BITCOIN_MAIN, 0);
 		
 		node.start();
 		
+		node.connect(new InetSocketAddress("192.168.0.100", 8333));
+
 		node.connect(new InetSocketAddress("localhost", 8333));
-		node.connect(new InetSocketAddress("localhost", 8333));
-		node.connect(new InetSocketAddress("localhost", 8333));
+		//node.connect(new InetSocketAddress("localhost", 8333));
+		//node.connect(new InetSocketAddress("localhost", 8333));
 		
 		System.in.read();
 		

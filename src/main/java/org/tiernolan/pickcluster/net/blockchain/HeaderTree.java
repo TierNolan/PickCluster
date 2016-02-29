@@ -19,6 +19,7 @@ import org.tiernolan.pickcluster.types.UInt256;
 import org.tiernolan.pickcluster.types.endian.EndianDataInputStream;
 import org.tiernolan.pickcluster.types.endian.EndianDataOutputStream;
 import org.tiernolan.pickcluster.types.reference.Header;
+import org.tiernolan.pickcluster.util.CatchingThread;
 import org.tiernolan.pickcluster.util.ThreadUtils;
 
 public class HeaderTree<T extends Header<T>> {
@@ -59,6 +60,26 @@ public class HeaderTree<T extends Header<T>> {
 			this.saveThread = null;
 			this.saveQueue = null;
 		}
+	}
+
+	public synchronized UInt256[] getLocators() {
+		List<UInt256> locators = new ArrayList<UInt256>(32);
+		T header = getChainTip();
+		for (int i = 0; i < 10 && header != null; i++) {
+			locators.add(header.getHash());
+		}
+		int step = 2;
+		while (header != null) {
+			locators.add(header.getHash());
+			HeaderInfo<T> info = getHeaderInfo(header);
+			info = info.getAncestorInfo(info.getHeight() - step);
+			header = info == null ? null : info.getHeader();
+			step *= 2;
+		}
+		if (!locators.get(locators.size() - 1).equals(genesis)) {
+			locators.add(genesis.getHash());
+		}
+		return locators.toArray(new UInt256[0]);
 	}
 	
 	public synchronized Boolean isOnMainChain(T header) {
@@ -155,6 +176,7 @@ public class HeaderTree<T extends Header<T>> {
 				HeaderInfo<T> removedHeader = (HeaderInfo<T>) mainChain[temp.getHeight()];
 				if (removedHeader != null) {
 					removedHeader.setOnMainChain(false);
+					mainChain[temp.getHeight()] = null;
 				}
 				
 				mainChain[temp.getHeight()] = temp;
@@ -183,6 +205,10 @@ public class HeaderTree<T extends Header<T>> {
 		
 		return true;
 		
+	}
+	
+	public synchronized HeaderInfo<T> getChainTipInfo() {
+		return chainTip;
 	}
 	
 	public synchronized T getChainTip() {
@@ -264,7 +290,7 @@ public class HeaderTree<T extends Header<T>> {
 		return maxIndex + 1;
 	}
 	
-	private class SaveThread extends Thread {
+	private class SaveThread extends CatchingThread {
 		
 		private final File directory;
 		
@@ -276,7 +302,8 @@ public class HeaderTree<T extends Header<T>> {
 			}
 		}
 		
-		public void run() {
+		@Override
+		public void secondaryRun() {
 			long fileIndex = getFirstFreeIndex(directory);
 			
 			while (saveQueueAlive.get() || (!saveQueue.isEmpty())) {

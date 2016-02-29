@@ -8,6 +8,8 @@ import org.tiernolan.pickcluster.types.endian.EndianDataInputStream;
 
 public class UInt256 extends UIntBase {
 	
+	public static final UInt256 EXAMPLE = new UInt256(BigInteger.ZERO);
+	
 	private final static int SIZE = 32;
 	
 	public UInt256(BigInteger value) {

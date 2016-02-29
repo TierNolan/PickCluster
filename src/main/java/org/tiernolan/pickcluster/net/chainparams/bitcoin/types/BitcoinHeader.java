@@ -19,6 +19,8 @@ import org.tiernolan.pickcluster.util.StringCreator;
 
 public class BitcoinHeader implements NetType, Header<BitcoinHeader> {
 	
+	public static final BitcoinHeader EXAMPLE = new BitcoinHeader(0, UInt256.EXAMPLE, UInt256.EXAMPLE, 0, TargetBits.EXAMPLE, 0, 0);
+	
 	private final int version;
 	private final UInt256 previous;
 	private final UInt256 merkleRoot;
