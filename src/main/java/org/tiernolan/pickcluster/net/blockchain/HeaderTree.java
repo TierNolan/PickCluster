@@ -90,6 +90,10 @@ public class HeaderTree<T extends Header<T>> {
 		return locators.toArray(new UInt256[0]);
 	}
 	
+	public synchronized boolean contains(UInt256 hash) {
+		return map.containsKey(hash);
+	}
+	
 	public synchronized Boolean isOnMainChain(T header) {
 		HeaderInfo<T> info = map.get(header.getHash());
 		return info == null ? null : info.isOnMainChain();

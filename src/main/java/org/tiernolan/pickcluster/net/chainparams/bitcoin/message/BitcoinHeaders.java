@@ -53,7 +53,6 @@ public class BitcoinHeaders extends Message {
 		} else {
 			sc.add("header_count", headers.length());
 		}
-		sc.add("header_count", headers.length());
 		return sc.toString();
 		
 	}

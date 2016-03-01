@@ -34,6 +34,7 @@ public class P2PNode extends CatchingThread {
 	private final long services;
 	private final String serverType;
 	protected final ChainParameters params;
+	protected boolean shuttingDown = false;
 	protected final ConcurrentHashMap<Integer, MessageConnection> connections = new ConcurrentHashMap<Integer, MessageConnection>();
 	private final TaskQueue taskQueue = new TaskQueue(); 
 	private final List<Pair<String, MessageHandler<? extends Message>>> globalMessageHandlers = new ArrayList<Pair<String, MessageHandler<? extends Message>>>();
@@ -127,6 +128,16 @@ public class P2PNode extends CatchingThread {
 		}
 	}
 	
+	protected boolean addConnection(MessageConnection connection) {
+		synchronized (connections) {
+			if (shuttingDown) {
+				return false;
+			}
+		}
+		connections.put(connection.getConnectionId(), connection);
+		return true;	
+	}
+	
 	protected boolean removeConnection(MessageConnection connection) {
 		return connections.remove(connection.getConnectionId(), connection);
 	}
@@ -156,6 +167,9 @@ public class P2PNode extends CatchingThread {
 				}
 			} finally {
 				executor.shutdown();
+				synchronized (connections) {
+					shuttingDown = true;
+				}
 				List<MessageConnection> connectionList = new ArrayList<MessageConnection>(connections.size());
 				connectionList.addAll(connections.values());
 				for (MessageConnection connection : connectionList) {
@@ -193,20 +207,21 @@ public class P2PNode extends CatchingThread {
 				try {
 					socket.connect(addr, CONNECT_TIMEOUT);
 				} catch (SocketTimeoutException e) {
-					System.out.println(getServerType() + ": Timeout when connecting to " + addr);
-					return;
+					throw new IOException("Timeout when connecting to " + addr, e);
 				}
 				connection = new MessageConnection(P2PNode.this, socket, true, params);
 				for (Pair<String, MessageHandler<? extends Message>> handler : globalMessageHandlers) {
 					connection.addHandler(handler.getFirst(), handler.getSecond());
 				}
-				connections.put(connection.getConnectionId(), connection);
+				if (!addConnection(connection)) {
+					throw new IOException("Unable to start connection to " + addr + " due to shutdown in progress");
+				}
 				for (MessageHandler<Message> handler : connectMessageHandlers) {
 					connection.addImmediateHandler(handler);
 				}
 				connection.start();
 			} catch (IOException e) {
-				e.printStackTrace();
+				System.out.println(getServerType() + ": " + e.getMessage());
 				if (socket != null) {
 					try {
 						socket.close();

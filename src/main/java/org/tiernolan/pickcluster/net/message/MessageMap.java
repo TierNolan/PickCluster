@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.tiernolan.pickcluster.net.message.common.InvCommon;
 import org.tiernolan.pickcluster.net.message.common.PingCommon;
 import org.tiernolan.pickcluster.net.message.common.PongCommon;
 import org.tiernolan.pickcluster.net.message.common.VerAckCommon;
@@ -73,6 +74,11 @@ public class MessageMap {
 			@Override
 			public PongCommon getMessage(int version, EndianDataInputStream in) throws IOException {
 				return new PongCommon(version, in);
+			}});
+		this.add("inv", new MessageConstructor<InvCommon>() {
+			@Override
+			public InvCommon getMessage(int version, EndianDataInputStream in) throws IOException {
+				return new InvCommon(version, in);
 			}});
 	}
 	
