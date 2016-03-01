@@ -1,28 +1,31 @@
-package org.tiernolan.pickcluster.net.chainparams.bitcoin.message;
+package org.tiernolan.pickcluster.net.message.reference;
 
 import java.io.IOException;
 
-import org.tiernolan.pickcluster.net.chainparams.bitcoin.types.BitcoinHeader;
 import org.tiernolan.pickcluster.net.message.Message;
 import org.tiernolan.pickcluster.types.NetTypeArray;
 import org.tiernolan.pickcluster.types.endian.EndianDataInputStream;
 import org.tiernolan.pickcluster.types.endian.EndianDataOutputStream;
+import org.tiernolan.pickcluster.types.reference.Header;
 import org.tiernolan.pickcluster.util.StringCreator;
 
-public class BitcoinHeaders extends Message {
+public class HeadersMessage<T extends Header<T>> extends Message {
 	
 	public final static int MAX_HEADERS_LENGTH = 2000;
 	
-	private final NetTypeArray<BitcoinHeader> headers;
+	private final NetTypeArray<T> headers;
 	
-	public BitcoinHeaders(BitcoinHeader[] headers) {
+	public HeadersMessage(T[] headers) {
 		super("headers");
-		this.headers = new NetTypeArray<BitcoinHeader>(headers, BitcoinHeader.class);
+		@SuppressWarnings("unchecked")
+		Class<T> clazz = (Class<T>) headers.getClass().getComponentType();
+		this.headers = new NetTypeArray<T>(headers, clazz);
 	}
 	
-	public BitcoinHeaders(int version, EndianDataInputStream in) throws IOException {
+	@SuppressWarnings("unchecked")
+	public HeadersMessage(int version, EndianDataInputStream in, Header<T> example) throws IOException {
 		super("headers");
-		this.headers = new NetTypeArray<BitcoinHeader>(version, in, MAX_HEADERS_LENGTH, BitcoinHeader.class, BitcoinHeader.EXAMPLE);
+		this.headers = new NetTypeArray<T>(version, in, MAX_HEADERS_LENGTH, (Class<T>) example.getClass(), (T) example);
 	}
 
 	@Override
@@ -30,16 +33,17 @@ public class BitcoinHeaders extends Message {
 		this.headers.write(version, out);
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
-	public BitcoinHeaders read(int version, EndianDataInputStream in, Object ... extraParams) throws IOException {
-		return new BitcoinHeaders(version, in);
+	public HeadersMessage<T> read(int version, EndianDataInputStream in, Object ... extraParams) throws IOException {
+		return new HeadersMessage<T>(version, in, (T) extraParams[0]);
 	}
 	
 	public int length() {
 		return headers.length();
 	}
 	
-	public BitcoinHeader getHeader(int index) {
+	public T getHeader(int index) {
 		return headers.get(index);
 	}
 

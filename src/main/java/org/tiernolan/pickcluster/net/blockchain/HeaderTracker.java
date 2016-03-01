@@ -1,4 +1,4 @@
-package org.tiernolan.pickcluster.net.chainparams.bitcoin;
+package org.tiernolan.pickcluster.net.blockchain;
 
 import java.io.File;
 import java.io.IOException;
@@ -7,29 +7,33 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.tiernolan.pickcluster.net.MessageConnection;
-import org.tiernolan.pickcluster.net.blockchain.HeaderTree;
-import org.tiernolan.pickcluster.net.chainparams.bitcoin.message.BitcoinHeaders;
+import org.tiernolan.pickcluster.net.P2PNode;
+import org.tiernolan.pickcluster.net.chainparams.ChainParameters;
+import org.tiernolan.pickcluster.net.chainparams.bitcoin.BitcoinMessageProtocol;
 import org.tiernolan.pickcluster.net.chainparams.bitcoin.message.BitcoinSendHeaders;
 import org.tiernolan.pickcluster.net.chainparams.bitcoin.types.BitcoinHeader;
 import org.tiernolan.pickcluster.net.message.Message;
 import org.tiernolan.pickcluster.net.message.MessageHandler;
 import org.tiernolan.pickcluster.net.message.common.GetHeadersCommon;
 import org.tiernolan.pickcluster.net.message.common.InvCommon;
+import org.tiernolan.pickcluster.net.message.reference.HeadersMessage;
 import org.tiernolan.pickcluster.types.InventoryType;
 import org.tiernolan.pickcluster.types.UInt256;
+import org.tiernolan.pickcluster.types.reference.Header;
 import org.tiernolan.pickcluster.util.Pair;
 
-public class HeaderTracker {
+public class HeaderTracker<T extends Header<T>> {
 	
-	private final HeaderTree<BitcoinHeader> tree;
-	private final BitcoinNode node;
+	private final HeaderTree<T> tree;
+	private final P2PNode node;
 	
-	public HeaderTracker(BitcoinNode node, BitcoinChainParams params) throws IOException {
+	public HeaderTracker(P2PNode node, ChainParameters params) throws IOException {
 		this.node = node;
 		File networkDir = new File("data", params.getNetworkName());
 		File headersDir = new File(networkDir, "headers");
 		
-		tree = new HeaderTree<BitcoinHeader>(node, params.getGenesis(), headersDir, params);
+		T genesis = params.getGenesis();
+		tree = new HeaderTree<T>(node, genesis, headersDir, params);
 	}
 	
 	private GetHeadersCommon getGetHeaders() {
@@ -63,12 +67,12 @@ public class HeaderTracker {
 		}
 	}
 	
-	private class HeadersMessageHandler implements MessageHandler<BitcoinHeaders> {
+	private class HeadersMessageHandler implements MessageHandler<HeadersMessage<T>> {
 		@Override
-		public void handle(MessageConnection connection, BitcoinHeaders message) {
+		public void handle(MessageConnection connection, HeadersMessage<T> message) {
 			int count = 0;
 			for (int i = 0; i < message.length(); i++) {
-				BitcoinHeader header = message.getHeader(i);
+				T header = message.getHeader(i);
 				try {
 					if (tree.add(header)) {
 						count++;
@@ -79,7 +83,7 @@ public class HeaderTracker {
 				}
 			}
 			System.out.println(node.getServerType() + "/HeaderTracker: Received new headers (" + count + "/" + message.length() + "), tree height is " + tree.getChainTipInfo().getHeight());
-			if (message.length() == BitcoinHeaders.MAX_HEADERS_LENGTH) {
+			if (count > 0 && message.length() == HeadersMessage.MAX_HEADERS_LENGTH) {
 				GetHeadersCommon getHeaders = getGetHeaders();
 				connection.sendMessage(getHeaders);
 			}

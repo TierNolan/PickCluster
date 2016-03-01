@@ -5,6 +5,7 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 
 import org.tiernolan.pickcluster.net.P2PNode;
+import org.tiernolan.pickcluster.net.chainparams.bitcoin.types.BitcoinHeader;
 import org.tiernolan.pickcluster.net.message.MessageMap;
 import org.tiernolan.pickcluster.net.message.MessageProtocol;
 import org.tiernolan.pickcluster.net.message.common.PingCommon;
@@ -17,7 +18,10 @@ import org.tiernolan.pickcluster.net.message.reference.VerackMessage;
 import org.tiernolan.pickcluster.net.message.reference.VersionMessage;
 import org.tiernolan.pickcluster.types.NetAddr;
 import org.tiernolan.pickcluster.types.SocketAddressType;
+import org.tiernolan.pickcluster.types.TargetBits;
+import org.tiernolan.pickcluster.types.UInt256;
 import org.tiernolan.pickcluster.types.VarString;
+import org.tiernolan.pickcluster.types.reference.Header;
 import org.tiernolan.pickcluster.util.TimeUtils;
 
 public class BitcoinMessageProtocol implements MessageProtocol {
@@ -66,5 +70,4 @@ public class BitcoinMessageProtocol implements MessageProtocol {
 	public PongMessage getPongMessage(Socket socket, P2PNode node, long pingNonce) {
 		return new PongCommon(pingNonce);
 	}
-
 }

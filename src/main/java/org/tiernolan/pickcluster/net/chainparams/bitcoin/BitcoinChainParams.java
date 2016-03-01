@@ -26,6 +26,15 @@ public class BitcoinChainParams implements ChainParameters {
 	private final BitcoinHeader genesis;
 	private final MessageProtocol messageProtocol;
 	
+	public static final BitcoinHeader BITCOIN_MAIN_GENESIS = 
+			new BitcoinHeader(
+					1, 
+					new UInt256(BigInteger.ZERO), 
+					new UInt256(new BigInteger(Convert.hexToBytes("004a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"))),
+					1231006505,
+					new TargetBits(TargetBits.bitsToTarget(0x1d00ffff)),
+					2083236893,
+					0);
 	public static final BitcoinChainParams BITCOIN_MAIN = new BitcoinChainParams(
 				"main",
 				8333,
@@ -35,14 +44,7 @@ public class BitcoinChainParams implements ChainParameters {
 				10 * 60,
 				14 * 24 * 60 * 60,
 				new BigInteger(Convert.hexToBytes("00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffff")),
-				new BitcoinHeader(
-						1, 
-						new UInt256(BigInteger.ZERO), 
-						new UInt256(new BigInteger(Convert.hexToBytes("004a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"))),
-						1231006505,
-						new TargetBits(TargetBits.bitsToTarget(0x1d00ffff)),
-						2083236893,
-						0),
+				BITCOIN_MAIN_GENESIS,
 				new BitcoinMessageProtocol()
 			);
 	

@@ -12,6 +12,6 @@ public interface ChainParameters {
 	public int getMaxMessageLength();
 	public int getBigEndianMessagePrefix();
 	public int getDefaultPort();
-	public Header<?> getGenesis();
+	public <T extends Header<T>> T getGenesis();
 	public MessageProtocol getMessageProtocol();
 }

@@ -15,6 +15,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import org.tiernolan.pickcluster.net.blockchain.HeaderTracker;
 import org.tiernolan.pickcluster.net.chainparams.ChainParameters;
 import org.tiernolan.pickcluster.net.message.Message;
 import org.tiernolan.pickcluster.net.message.MessageHandler;
@@ -41,7 +42,8 @@ public class P2PNode extends CatchingThread {
 	private final List<MessageHandler<Message>> connectMessageHandlers = new ArrayList<MessageHandler<Message>>();
 	private boolean handlerListsMutable;
 	private final ExecutorService executor = new ThreadPoolExecutor(4, 8, 10, TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(100));
-	
+	private HeaderTracker<?> tracker;
+
 	public P2PNode(String serverType, ChainParameters params, long services) throws IOException {
 		super(serverType + "/P2PNode");
 		this.services = services;
@@ -54,7 +56,7 @@ public class P2PNode extends CatchingThread {
 		
 	}
 	
-	protected final void addGlobalMessageHandler(String command, MessageHandler<? extends Message> handler) {
+	protected final void addGlobalMessageHandler(String command, MessageHandler<? extends Message> handler) throws IOException {
 		if (!handlerListsMutable) {
 			throw new IllegalStateException("Attempt made to modify global message handlers outside constructor");
 		}
@@ -68,10 +70,16 @@ public class P2PNode extends CatchingThread {
 		connectMessageHandlers.add(handler);
 	}
 	
+	@SuppressWarnings("rawtypes")
 	protected void addGlobalMessageHandlers() throws IOException {
+		this.tracker = new HeaderTracker(this, params);
+		for (Pair<String, MessageHandler<? extends Message>> h : tracker.getMessageHandlers()) {
+			addGlobalMessageHandler(h.getFirst(), h.getSecond());
+		}
 	}
 	
 	protected void addOnConnectMessageHandlers() throws IOException {
+		addConnectMessageHandler(tracker.getOnConnectMessageHandler());
 	}
 	
 	public NetAddr getNetAddr() {
@@ -145,6 +153,7 @@ public class P2PNode extends CatchingThread {
 	
 	public void interrupt() {
 		super.interrupt();
+		tracker.shutdownSaveThread(false);
 		synchronized(taskQueue) {
 			taskQueue.notify();
 		}

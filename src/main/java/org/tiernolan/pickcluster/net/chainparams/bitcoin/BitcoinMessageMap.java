@@ -1,12 +1,6 @@
 package org.tiernolan.pickcluster.net.chainparams.bitcoin;
 
-import java.io.IOException;
-
-import org.tiernolan.pickcluster.net.chainparams.bitcoin.message.BitcoinHeaders;
-import org.tiernolan.pickcluster.net.message.MessageConstructor;
 import org.tiernolan.pickcluster.net.message.MessageMap;
-import org.tiernolan.pickcluster.net.message.common.GetHeadersCommon;
-import org.tiernolan.pickcluster.types.endian.EndianDataInputStream;
 
 public class BitcoinMessageMap extends MessageMap {
 	
@@ -15,20 +9,11 @@ public class BitcoinMessageMap extends MessageMap {
 	}
 	
 	public BitcoinMessageMap() {
+		super(BitcoinChainParams.BITCOIN_MAIN_GENESIS);
 	}
 	
 	@Override
 	protected void addAllConstructors() {
-		this.add("headers", new MessageConstructor<BitcoinHeaders>() {
-			@Override
-			public BitcoinHeaders getMessage(int version, EndianDataInputStream in) throws IOException {
-				return new BitcoinHeaders(version, in);
-			}});
-		this.add("getheaders", new MessageConstructor<GetHeadersCommon>() {
-			@Override
-			public GetHeadersCommon getMessage(int version, EndianDataInputStream in) throws IOException {
-				return new GetHeadersCommon(version, in);
-			}});
 	}
 	
 	@Override
