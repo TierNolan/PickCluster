@@ -1,4 +1,4 @@
-package org.tiernolan.pickcluster.net.message.reference;
+package org.tiernolan.pickcluster.net.message.common;
 
 import java.io.IOException;
 
@@ -9,13 +9,13 @@ import org.tiernolan.pickcluster.types.endian.EndianDataOutputStream;
 import org.tiernolan.pickcluster.types.reference.Header;
 import org.tiernolan.pickcluster.util.StringCreator;
 
-public class HeadersMessage<T extends Header<T>> extends Message {
+public class HeadersCommon<T extends Header<T>> extends Message {
 	
 	public final static int MAX_HEADERS_LENGTH = 2000;
 	
 	private final NetTypeArray<T> headers;
 	
-	public HeadersMessage(T[] headers) {
+	public HeadersCommon(T[] headers) {
 		super("headers");
 		@SuppressWarnings("unchecked")
 		Class<T> clazz = (Class<T>) headers.getClass().getComponentType();
@@ -23,7 +23,7 @@ public class HeadersMessage<T extends Header<T>> extends Message {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public HeadersMessage(int version, EndianDataInputStream in, Header<T> example) throws IOException {
+	public HeadersCommon(int version, EndianDataInputStream in, Header<T> example) throws IOException {
 		super("headers");
 		this.headers = new NetTypeArray<T>(version, in, MAX_HEADERS_LENGTH, (Class<T>) example.getClass(), (T) example);
 	}
@@ -35,8 +35,8 @@ public class HeadersMessage<T extends Header<T>> extends Message {
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	public HeadersMessage<T> read(int version, EndianDataInputStream in, Object ... extraParams) throws IOException {
-		return new HeadersMessage<T>(version, in, (T) extraParams[0]);
+	public HeadersCommon<T> read(int version, EndianDataInputStream in, Object ... extraParams) throws IOException {
+		return new HeadersCommon<T>(version, in, (T) extraParams[0]);
 	}
 	
 	public int length() {

@@ -3,7 +3,6 @@ package org.tiernolan.pickcluster.net.message.common;
 import java.io.IOException;
 
 import org.tiernolan.pickcluster.net.message.Message;
-import org.tiernolan.pickcluster.net.message.reference.HeadersMessage;
 import org.tiernolan.pickcluster.types.NetTypeArray;
 import org.tiernolan.pickcluster.types.UInt256;
 import org.tiernolan.pickcluster.types.endian.EndianDataInputStream;
@@ -26,7 +25,7 @@ public class GetHeadersCommon extends Message {
 	public GetHeadersCommon(int version, EndianDataInputStream in) throws IOException {
 		super("version");
 		this.version = in.readLEInt();
-		this.locators = new NetTypeArray<UInt256>(version, in, HeadersMessage.MAX_HEADERS_LENGTH, UInt256.class, UInt256.EXAMPLE);
+		this.locators = new NetTypeArray<UInt256>(version, in, HeadersCommon.MAX_HEADERS_LENGTH, UInt256.class, UInt256.EXAMPLE);
 		this.stop = new UInt256(in);
 	}
 

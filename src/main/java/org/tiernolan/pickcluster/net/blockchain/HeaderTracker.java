@@ -10,13 +10,13 @@ import org.tiernolan.pickcluster.net.MessageConnection;
 import org.tiernolan.pickcluster.net.P2PNode;
 import org.tiernolan.pickcluster.net.chainparams.ChainParameters;
 import org.tiernolan.pickcluster.net.chainparams.bitcoin.BitcoinMessageProtocol;
-import org.tiernolan.pickcluster.net.chainparams.bitcoin.message.BitcoinSendHeaders;
 import org.tiernolan.pickcluster.net.chainparams.bitcoin.types.BitcoinHeader;
 import org.tiernolan.pickcluster.net.message.Message;
 import org.tiernolan.pickcluster.net.message.MessageHandler;
 import org.tiernolan.pickcluster.net.message.common.GetHeadersCommon;
+import org.tiernolan.pickcluster.net.message.common.HeadersCommon;
 import org.tiernolan.pickcluster.net.message.common.InvCommon;
-import org.tiernolan.pickcluster.net.message.reference.HeadersMessage;
+import org.tiernolan.pickcluster.net.message.common.SendHeadersCommon;
 import org.tiernolan.pickcluster.types.InventoryType;
 import org.tiernolan.pickcluster.types.UInt256;
 import org.tiernolan.pickcluster.types.reference.Header;
@@ -62,14 +62,14 @@ public class HeaderTracker<T extends Header<T>> {
 	private class OnConnectGetHeadersTask implements MessageHandler<Message> {
 		@Override
 		public void handle(MessageConnection connection, Message message) throws IOException {
-			connection.sendMessage(new BitcoinSendHeaders());
+			connection.sendMessage(new SendHeadersCommon());
 			connection.sendMessage(getGetHeaders());
 		}
 	}
 	
-	private class HeadersMessageHandler implements MessageHandler<HeadersMessage<T>> {
+	private class HeadersMessageHandler implements MessageHandler<HeadersCommon<T>> {
 		@Override
-		public void handle(MessageConnection connection, HeadersMessage<T> message) {
+		public void handle(MessageConnection connection, HeadersCommon<T> message) {
 			int count = 0;
 			for (int i = 0; i < message.length(); i++) {
 				T header = message.getHeader(i);
@@ -83,7 +83,7 @@ public class HeaderTracker<T extends Header<T>> {
 				}
 			}
 			System.out.println(node.getServerType() + "/HeaderTracker: Received new headers (" + count + "/" + message.length() + "), tree height is " + tree.getChainTipInfo().getHeight());
-			if (count > 0 && message.length() == HeadersMessage.MAX_HEADERS_LENGTH) {
+			if (count > 0 && message.length() == HeadersCommon.MAX_HEADERS_LENGTH) {
 				GetHeadersCommon getHeaders = getGetHeaders();
 				connection.sendMessage(getHeaders);
 			}

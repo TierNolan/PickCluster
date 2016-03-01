@@ -1,19 +1,18 @@
-package org.tiernolan.pickcluster.net.chainparams.bitcoin.message;
+package org.tiernolan.pickcluster.net.message.common;
 
 import java.io.IOException;
 
-import org.tiernolan.pickcluster.net.chainparams.bitcoin.types.BitcoinHeader;
 import org.tiernolan.pickcluster.net.message.Message;
 import org.tiernolan.pickcluster.types.endian.EndianDataInputStream;
 import org.tiernolan.pickcluster.types.endian.EndianDataOutputStream;
 
-public class BitcoinSendHeaders extends Message {
+public class SendHeadersCommon extends Message {
 	
-	public BitcoinSendHeaders() {
+	public SendHeadersCommon() {
 		super("sendheaders");
 	}
 	
-	public BitcoinSendHeaders(int version, EndianDataInputStream in) throws IOException {
+	public SendHeadersCommon(int version, EndianDataInputStream in) throws IOException {
 		super("sendheaders");
 	}
 
@@ -22,8 +21,8 @@ public class BitcoinSendHeaders extends Message {
 	}
 	
 	@Override
-	public BitcoinSendHeaders read(int version, EndianDataInputStream in, Object ... extraParams) throws IOException {
-		return new BitcoinSendHeaders(version, in);
+	public SendHeadersCommon read(int version, EndianDataInputStream in, Object ... extraParams) throws IOException {
+		return new SendHeadersCommon(version, in);
 	}
 	
 	@Override

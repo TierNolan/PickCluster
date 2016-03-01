@@ -7,14 +7,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.tiernolan.pickcluster.net.chainparams.ChainParameters;
 import org.tiernolan.pickcluster.net.message.common.GetHeadersCommon;
+import org.tiernolan.pickcluster.net.message.common.HeadersCommon;
 import org.tiernolan.pickcluster.net.message.common.InvCommon;
 import org.tiernolan.pickcluster.net.message.common.PingCommon;
 import org.tiernolan.pickcluster.net.message.common.PongCommon;
+import org.tiernolan.pickcluster.net.message.common.SendHeadersCommon;
 import org.tiernolan.pickcluster.net.message.common.VerAckCommon;
 import org.tiernolan.pickcluster.net.message.common.VersionCommon;
-import org.tiernolan.pickcluster.net.message.reference.HeadersMessage;
 import org.tiernolan.pickcluster.types.UInt96;
 import org.tiernolan.pickcluster.types.encode.Convert;
 import org.tiernolan.pickcluster.types.endian.EndianDataInputStream;
@@ -93,11 +93,16 @@ public class MessageMap {
 			public GetHeadersCommon getMessage(int version, EndianDataInputStream in) throws IOException {
 				return new GetHeadersCommon(version, in);
 			}});
-		this.add("headers", new MessageConstructor<HeadersMessage<? extends Header<?>>>() {
+		this.add("headers", new MessageConstructor<HeadersCommon<? extends Header<?>>>() {
 			@SuppressWarnings({ "rawtypes", "unchecked" })
 			@Override
-			public HeadersMessage<?> getMessage(int version, EndianDataInputStream in) throws IOException {
-				return (HeadersMessage<? extends Header<?>>) new HeadersMessage(version, in, headerExample);
+			public HeadersCommon<?> getMessage(int version, EndianDataInputStream in) throws IOException {
+				return (HeadersCommon<? extends Header<?>>) new HeadersCommon(version, in, headerExample);
+			}});
+		this.add("sendheaders", new MessageConstructor<SendHeadersCommon>() {
+			@Override
+			public SendHeadersCommon getMessage(int version, EndianDataInputStream in) throws IOException {
+				return new SendHeadersCommon(version, in);
 			}});
 	}
 	
