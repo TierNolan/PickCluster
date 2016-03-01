@@ -139,6 +139,7 @@ public class P2PNode extends CatchingThread {
 	}
 	
 	protected boolean removeConnection(MessageConnection connection) {
+		System.out.println(getServerType() + ": Closed connection " + connection);
 		return connections.remove(connection.getConnectionId(), connection);
 	}
 	
@@ -177,7 +178,6 @@ public class P2PNode extends CatchingThread {
 				}
 				for (MessageConnection connection : connectionList) {
 					ThreadUtils.joinUninterruptibly(connection);
-					System.out.println(getServerType() + ": Closed connection " + connection);
 				}
 				boolean shutdown = false;
 				while (!shutdown) {
