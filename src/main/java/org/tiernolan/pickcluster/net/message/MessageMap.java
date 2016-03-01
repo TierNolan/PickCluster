@@ -7,6 +7,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.tiernolan.pickcluster.net.message.common.AddrCommon;
+import org.tiernolan.pickcluster.net.message.common.GetAddrCommon;
 import org.tiernolan.pickcluster.net.message.common.GetHeadersCommon;
 import org.tiernolan.pickcluster.net.message.common.HeadersCommon;
 import org.tiernolan.pickcluster.net.message.common.InvCommon;
@@ -104,6 +106,17 @@ public class MessageMap {
 			public SendHeadersCommon getMessage(int version, EndianDataInputStream in) throws IOException {
 				return new SendHeadersCommon(version, in);
 			}});
+		this.add("getaddr", new MessageConstructor<GetAddrCommon>() {
+			@Override
+			public GetAddrCommon getMessage(int version, EndianDataInputStream in) throws IOException {
+				return new GetAddrCommon(version, in);
+			}});
+		this.add("addr", new MessageConstructor<AddrCommon>() {
+			@Override
+			public AddrCommon getMessage(int version, EndianDataInputStream in) throws IOException {
+				return new AddrCommon(version, in);
+			}});
+		
 	}
 	
 	protected void addAllConstructors() {

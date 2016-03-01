@@ -11,6 +11,7 @@ import org.tiernolan.pickcluster.util.StringCreator;
 public class NetAddr implements NetType {
 	
 	public static final NetAddr NULL_ADDRESS;
+	public static final NetAddr EXAMPLE;
 	
 	static {
 		NetAddr addr = null;
@@ -20,6 +21,7 @@ public class NetAddr implements NetType {
 			throw new IllegalStateException(e);
 		}
 		NULL_ADDRESS = addr;
+		EXAMPLE = NULL_ADDRESS;
 		
 	}
 	

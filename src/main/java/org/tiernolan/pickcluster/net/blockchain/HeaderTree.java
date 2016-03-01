@@ -21,9 +21,12 @@ import org.tiernolan.pickcluster.types.endian.EndianDataInputStream;
 import org.tiernolan.pickcluster.types.endian.EndianDataOutputStream;
 import org.tiernolan.pickcluster.types.reference.Header;
 import org.tiernolan.pickcluster.util.CatchingThread;
+import org.tiernolan.pickcluster.util.FileUtils;
 import org.tiernolan.pickcluster.util.ThreadUtils;
 
 public class HeaderTree<T extends Header<T>> {
+	
+	private final static String PREFIX = "hdr";
 	
 	private boolean checkPOW = true;
 	
@@ -232,10 +235,9 @@ public class HeaderTree<T extends Header<T>> {
 	}
 	
 	private void readFromDisk(File directory) {
-		long[] indexes = getIndexes(directory);
-		Arrays.sort(indexes);
+		long[] indexes = FileUtils.getIndexes(directory, PREFIX);
 		for (long index : indexes) {
-			String filename = getFilename(index);
+			String filename = FileUtils.getFilename(index, PREFIX);
 			File file = new File(directory, filename);
 			FileInputStream fis = null;
 			try {
@@ -262,46 +264,6 @@ public class HeaderTree<T extends Header<T>> {
 		}
 	}
 	
-	private String getFilename(long index) {
-		return "hdr" + String.format("%08d", index) + ".dat";
-	}
-	
-	private long[] getIndexes(File directory) {
-		File[] files = directory.listFiles();
-		if (files == null) {
-			return null;
-		}
-		List<Long> indexes = new ArrayList<Long>();
-		for (File file : files) {
-			String filename = file.getName();
-			if (filename.startsWith("hdr") && filename.endsWith(".dat") && filename.length() == 15) {
-				String indexString = filename.substring(3, 11);
-				try {
-					indexes.add(Long.parseLong(indexString));	
-				} catch (NumberFormatException e) {
-					continue;
-				}
-			}
-		}
-		long[] array = new long[indexes.size()];
-		int i = 0;
-		for (Long index : indexes) {
-			array[i++] = index;
-		}
-		return array;
-	}
-	
-	private long getFirstFreeIndex(File directory) {
-		long[] indexes = getIndexes(directory);
-		long maxIndex = 0;
-		for (long index : indexes) {
-			if (index > maxIndex) {
-				maxIndex = index;
-			}
-		}
-		return maxIndex + 1;
-	}
-	
 	private class SaveThread extends CatchingThread {
 		
 		private final File directory;
@@ -316,10 +278,10 @@ public class HeaderTree<T extends Header<T>> {
 		
 		@Override
 		public void secondaryRun() {
-			long fileIndex = getFirstFreeIndex(directory);
+			long fileIndex = FileUtils.getFirstFreeIndex(directory, PREFIX);
 			
 			while (saveQueueAlive.get() || (!saveQueue.isEmpty())) {
-				String filename = getFilename(fileIndex++);
+				String filename = FileUtils.getFilename(fileIndex++, PREFIX);
 				FileOutputStream fos = null;
 				EndianDataOutputStream eos = null;
 				try {
