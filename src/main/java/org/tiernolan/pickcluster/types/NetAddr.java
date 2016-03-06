@@ -56,6 +56,30 @@ public class NetAddr implements NetType {
 		this.socket = new SocketAddressType(in);
 	}
 	
+	public long getAddressPrefix() {
+		return socket.getAddressPrefix();
+	}
+	
+	public long getTimestamp() {
+		return timestamp & 0xFFFFFFFFL;
+	}
+	
+	public long getServices() {
+		return services;
+	}
+	
+	public InetAddress getAddress() {
+		return socket.getAddress();
+	}
+	
+	public int getPort() {
+		return socket.getPort();
+	}
+	
+	public SocketAddressType getAddr() {
+		return socket;
+	}
+	
 	public void write(int version, EndianDataOutputStream out) throws IOException {
 		write(out);
 	}
@@ -85,6 +109,20 @@ public class NetAddr implements NetType {
 	@Override
 	public int estimateSize() {
 		return 4 + 8 + this.socket.estimateSize();
+	}
+	
+	@Override
+	public boolean equals(Object o) {
+		if (o instanceof NetAddr) {
+			NetAddr other = (NetAddr) o;
+			return other.version == this.version && other.timestamp == this.timestamp && other.services == this.services && other.socket.equals(this.socket);
+		}
+		return false;
+	}
+	
+	@Override
+	public int hashCode() {
+		return (int) (this.timestamp + (this.services ^ (this.services >> 32)) + this.socket.hashCode());
 	}
 	
 }

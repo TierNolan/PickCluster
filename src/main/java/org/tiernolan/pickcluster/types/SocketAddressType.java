@@ -1,5 +1,6 @@
 package org.tiernolan.pickcluster.types;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -46,6 +47,32 @@ public class SocketAddressType implements NetType {
 	
 	public SocketAddressType read(int version, EndianDataInputStream in, Object ... extraParams) throws IOException {
 		return new SocketAddressType(in);
+	}
+	
+	public boolean isIP4() {
+		byte[] asBytes = ip.getBytes();
+		for (int i = 0; i < 12; i++) {
+			if (nullAddress[i] != asBytes[i]) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	public long getAddressPrefix() {
+		byte[] asBytes = ip.getBytes();
+		ByteArrayInputStream bis = new ByteArrayInputStream(asBytes);
+		EndianDataInputStream eis = new EndianDataInputStream(bis);
+		try {
+			if (isIP4()) {
+				eis.skip(12);
+				return ((long) eis.readBEInt()) << 32;
+			} else {
+				return eis.readBELong();
+			}
+		} catch (IOException e) {
+			throw new IllegalStateException("Unexpected IOException thrown, " + e);
+		}
 	}
 	
 	public InetAddress getAddress() {

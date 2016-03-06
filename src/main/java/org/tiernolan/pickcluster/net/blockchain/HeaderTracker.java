@@ -10,7 +10,6 @@ import org.tiernolan.pickcluster.net.MessageConnection;
 import org.tiernolan.pickcluster.net.P2PNode;
 import org.tiernolan.pickcluster.net.chainparams.ChainParameters;
 import org.tiernolan.pickcluster.net.chainparams.bitcoin.BitcoinMessageProtocol;
-import org.tiernolan.pickcluster.net.chainparams.bitcoin.types.BitcoinHeader;
 import org.tiernolan.pickcluster.net.message.Message;
 import org.tiernolan.pickcluster.net.message.MessageHandler;
 import org.tiernolan.pickcluster.net.message.common.GetHeadersCommon;
@@ -20,6 +19,7 @@ import org.tiernolan.pickcluster.net.message.common.SendHeadersCommon;
 import org.tiernolan.pickcluster.types.InventoryType;
 import org.tiernolan.pickcluster.types.UInt256;
 import org.tiernolan.pickcluster.types.reference.Header;
+import org.tiernolan.pickcluster.util.FileUtils;
 import org.tiernolan.pickcluster.util.Pair;
 
 public class HeaderTracker<T extends Header<T>> {
@@ -29,8 +29,7 @@ public class HeaderTracker<T extends Header<T>> {
 	
 	public HeaderTracker(P2PNode node, ChainParameters params) throws IOException {
 		this.node = node;
-		File networkDir = new File("data", params.getNetworkName());
-		File headersDir = new File(networkDir, "headers");
+		File headersDir = FileUtils.getDataDirectory(params, "headers");
 		
 		T genesis = params.getGenesis();
 		tree = new HeaderTree<T>(node, genesis, headersDir, params);
@@ -107,12 +106,4 @@ public class HeaderTracker<T extends Header<T>> {
 			}
 		}
 	}
-	
-	private class BroadcastGetHeadersTask implements Runnable {
-		@Override
-		public void run() {
-			node.broadcast(getGetHeaders());
-		}
-	}
-	
 }

@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.tiernolan.pickcluster.net.chainparams.ChainParameters;
+
 public class FileUtils {
 	
 	public static long[] getIndexes(File directory, String prefix) {
@@ -46,6 +48,13 @@ public class FileUtils {
 	
 	public static String getFilename(long index, String prefix) {
 		return prefix + String.format("%08d", index) + ".dat";
+	}
+	
+	public static File getDataDirectory(ChainParameters params, String type) {
+		File networkDir = new File("data", params.getNetworkName());
+		File targetDir = new File(networkDir, type);
+		return targetDir;
+
 	}
 
 }
