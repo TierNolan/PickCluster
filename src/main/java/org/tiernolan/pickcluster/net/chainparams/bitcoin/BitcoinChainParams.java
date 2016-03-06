@@ -1,14 +1,17 @@
 package org.tiernolan.pickcluster.net.chainparams.bitcoin;
 
 import java.math.BigInteger;
+import java.util.List;
 
 import org.tiernolan.pickcluster.net.blockchain.HeaderInfo;
 import org.tiernolan.pickcluster.net.chainparams.ChainParameters;
 import org.tiernolan.pickcluster.net.chainparams.bitcoin.types.BitcoinHeader;
 import org.tiernolan.pickcluster.net.message.MessageProtocol;
+import org.tiernolan.pickcluster.types.SocketAddressType;
 import org.tiernolan.pickcluster.types.TargetBits;
 import org.tiernolan.pickcluster.types.UInt256;
 import org.tiernolan.pickcluster.types.encode.Convert;
+import org.tiernolan.pickcluster.types.reference.Header;
 
 public class BitcoinChainParams implements ChainParameters {
 	
@@ -25,6 +28,7 @@ public class BitcoinChainParams implements ChainParameters {
 	private final BigInteger maxPOWTarget;
 	private final BitcoinHeader genesis;
 	private final MessageProtocol messageProtocol;
+	private final List<SocketAddressType> fixedSeeds;
 	
 	public static final BitcoinHeader BITCOIN_MAIN_GENESIS = 
 			new BitcoinHeader(
@@ -45,10 +49,11 @@ public class BitcoinChainParams implements ChainParameters {
 				14 * 24 * 60 * 60,
 				new BigInteger(Convert.hexToBytes("00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffff")),
 				BITCOIN_MAIN_GENESIS,
-				new BitcoinMessageProtocol()
+				new BitcoinMessageProtocol(),
+				BitcoinFixedSeeds.MAIN_SEEDS
 			);
 	
-	protected BitcoinChainParams(String name, int defaultPort, int maxMessage, int subsidyHalving, int messagePrefix, int retargetSpacing, int retargetTimespan, BigInteger maxPOWTarget, BitcoinHeader genesis, MessageProtocol messageProtocol) {
+	protected BitcoinChainParams(String name, int defaultPort, int maxMessage, int subsidyHalving, int messagePrefix, int retargetSpacing, int retargetTimespan, BigInteger maxPOWTarget, BitcoinHeader genesis, MessageProtocol messageProtocol, List<SocketAddressType> fixedSeeds) {
 		this.name = name;
 		this.defaultPort = defaultPort;
 		this.maxMessage = maxMessage;
@@ -60,6 +65,7 @@ public class BitcoinChainParams implements ChainParameters {
 		this.maxPOWTarget = maxPOWTarget;
 		this.genesis = genesis;
 		this.messageProtocol = messageProtocol; 
+		this.fixedSeeds = fixedSeeds;
 	}
 	
 	@Override
@@ -126,6 +132,11 @@ public class BitcoinChainParams implements ChainParameters {
 	@Override
 	public int getMaxMessageLength() {
 		return maxMessage;
+	}
+
+	@Override
+	public List<SocketAddressType> getFixedSeeds() {
+		return fixedSeeds;
 	}
 
 }

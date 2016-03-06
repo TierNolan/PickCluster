@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
@@ -46,22 +47,31 @@ public class AddrTracker {
 	private final LinkedBlockingQueue<AddressFileData> fileDataQueue = new LinkedBlockingQueue<AddressFileData>();
 
 	public AddrTracker(P2PNode node, ChainParameters params) {
+		this(node, params, true);
+	}
+	
+	public AddrTracker(P2PNode node, ChainParameters params, boolean saveToDisk) {
 		this.node = node;
 		this.params = params;
-		this.fileWriteThread = new FileWriteThread();
+		this.fileWriteThread = saveToDisk ? new FileWriteThread() : null;
 		readFromDisk();
-		this.fileWriteThread.start();
+		addFixed(params);
+		if (saveToDisk) {
+			this.fileWriteThread.start();
+		}
 	}
 	
 	public void interrupt(boolean wait) {
 		this.interrupt();
-		if (wait) {
+		if (wait && fileWriteThread != null) {
 			ThreadUtils.joinUninterruptibly(fileWriteThread);
 		}
 	}
 	
 	public void interrupt() {
-		this.fileWriteThread.interrupt();
+		if (fileWriteThread != null) {
+			fileWriteThread.interrupt();
+		}
 	}
 	
 	public synchronized NetAddr[] getAddresses() {
@@ -127,11 +137,11 @@ public class AddrTracker {
 		return bestAddr;
 	}
 	
-	public synchronized void add(NetAddr addr, boolean directConnect) {
-		add(addr, directConnect, false);
+	public synchronized boolean add(NetAddr addr, boolean directConnect) {
+		return add(addr, directConnect, false);
 	}
 	
-	private synchronized void add(NetAddr addr, boolean directConnect, boolean useRaw) {
+	private synchronized boolean add(NetAddr addr, boolean directConnect, boolean useRaw) {
 		long timestamp;
 		if (useRaw) {
 			timestamp = addr.getTimestamp();
@@ -144,7 +154,9 @@ public class AddrTracker {
 		Long oldTime = addrToTime.get(socketAddr.getAddress());
 		if (oldTime == null || timestamp > oldTime + (6 * TimeUtils.HOUR_IN_SECONDS)) {
 			updateMap(addr, oldTime, timestamp);
+			return true;
 		}
+		return false;
 	}
 	
 	public synchronized void ban(NetAddr addr) {
@@ -182,7 +194,7 @@ public class AddrTracker {
 		Random r = null;
 		while (timeToAddr.get(newTime) != null) {
 			r = r == null ? new Random() : r;
-			newTime -= r.nextInt(32) + 1;
+			newTime += (r.nextBoolean() ? 1 : -1) * (r.nextInt(32) + 1);
 		}
 		
 		NetAddr newTimeNetAddr = new NetAddr((int) newTime, netAddr.getServices(), netAddr.getAddr());
@@ -223,6 +235,18 @@ public class AddrTracker {
 					i.remove();
 				}
 			}
+		}
+	}
+	
+	private void addFixed(ChainParameters params) {
+		List<SocketAddressType> fixedSeeds = params.getFixedSeeds();
+		if (fixedSeeds == null) {
+			return;
+		}
+		long sixDaysAgo = TimeUtils.getNowTimestamp() - (6 * TimeUtils.DAY_IN_SECONDS);
+		for (SocketAddressType seed : fixedSeeds) {
+			NetAddr netAddr = new NetAddr((int) sixDaysAgo, 0L, seed);
+			this.add(netAddr, false, true);
 		}
 	}
 	

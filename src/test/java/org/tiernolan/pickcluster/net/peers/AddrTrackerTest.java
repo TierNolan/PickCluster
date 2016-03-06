@@ -11,6 +11,7 @@ import java.util.List;
 
 import org.junit.Test;
 import org.tiernolan.pickcluster.net.chainparams.ChainParameters;
+import org.tiernolan.pickcluster.net.chainparams.bitcoin.BitcoinChainParams;
 import org.tiernolan.pickcluster.net.message.MessageProtocol;
 import org.tiernolan.pickcluster.types.NetAddr;
 import org.tiernolan.pickcluster.types.SocketAddressType;
@@ -54,6 +55,11 @@ public class AddrTrackerTest {
 
 		@Override
 		public MessageProtocol getMessageProtocol() {
+			return null;
+		}
+
+		@Override
+		public List<SocketAddressType> getFixedSeeds() {
 			return null;
 		}
 	};
@@ -160,5 +166,23 @@ public class AddrTrackerTest {
 				f.delete();
 			}
 		}
+	}
+	
+	@Test
+	public void testFixed() {
+		AddrTracker addrTracker = new AddrTracker(null, BitcoinChainParams.BITCOIN_MAIN, false);
+
+		List<InetAddress> connected = new ArrayList<InetAddress>(8);
+		for (int i = 0; i < 32; i++) {
+			NetAddr addr = addrTracker.getAddress(connected.toArray(new InetAddress[0]));
+			InetAddress inet = addr.getAddress();
+			byte[] newAddr = inet.getAddress();
+			for (InetAddress peer : connected) {
+				byte[] peerAddr = peer.getAddress();
+				assertNotSame(newAddr, peerAddr);
+			}
+			connected.add(inet);
+		}
+
 	}
 }
